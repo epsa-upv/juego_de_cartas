@@ -2,4 +2,4 @@
 rongheng xu
 Tomás Engonga Ovono Nsuga
 Gabriel Alexander Morales Aldana - gamorald@epsa.upv.es
-Joan Torregrosa Alonso - Joantorre05@gmail.com
+Joan Torregrosa Alonso - jtoralo@epsa.upv.es
