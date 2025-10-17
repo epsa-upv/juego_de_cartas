@@ -68,6 +68,7 @@ El jugador con **más puntos** después de las 19 rondas gana el juego. Es posib
 - **[Tekeye.uk](https://www.tekeye.uk/playing_cards/svg-playing-cards)** - SVG de dominio público
 - **[Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_playing_cards)** - Múltiples estilos de barajas
 - **[OpenClipArt](https://openclipart.org/)** - Gráficos libres de uso
+- **[Imágenes interfaz](https://iconscout.com/es/illustrations/jugando-a-las-cartas-con-hijo)** - imagenes
 
 #### Cartas de Nicu Buculei
 Las cartas utilizadas en CardGames.io fueron creadas por **Nicu Buculei** y están disponibles gratuitamente.
