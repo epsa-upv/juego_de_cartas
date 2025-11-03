@@ -12,7 +12,11 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Redirige directamente a Home.html al presionar el botón
-        response.sendRedirect(request.getContextPath() + "/Home.html");
+        // Aquí puedes validar el usuario/contraseña si lo deseas
+        // String usuario = request.getParameter("usuario");
+        // String clave = request.getParameter("clave");
+
+        // Por ahora redirige directamente a home.html
+        response.sendRedirect(request.getContextPath() + "/home.html");
     }
 }
