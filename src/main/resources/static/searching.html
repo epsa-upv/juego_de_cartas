@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! Game - Buscando</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <span class="header-title">En partida</span>
+        </header>
+
+        <main class="main-content searching">
+            <div class="logo-container">
+                <div class="logo">
+                    <div class="cards-stack">
+                        <div class="card card-1">
+                            <span class="card-suit">♠</span>
+                        </div>
+                        <div class="card card-2">
+                            <span class="card-suit">♠</span>
+                        </div>
+                        <div class="card card-3">
+                            <span class="card-suit">♥</span>
+                        </div>
+                        <div class="card card-4">
+                            <span class="card-suit">♥</span>
+                        </div>
+                    </div>
+                    <h1 class="game-title">
+                        <span class="oh">OH</span><br>
+                        <span class="hell">HELL</span>
+                    </h1>
+                </div>
+            </div>
+
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p class="loading-text">Buscando</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-cancel" onclick="cancelarBusqueda()">Cancelar</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>

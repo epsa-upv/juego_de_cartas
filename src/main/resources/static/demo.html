@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! Game - Demo de Todas las Pantallas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin: 30px 0;
+            color: #FFD700;
+            font-size: 36px;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .demo-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .demo-card h2 {
+            color: #B946D6;
+            margin-bottom: 15px;
+            font-size: 24px;
+            border-bottom: 2px solid #B946D6;
+            padding-bottom: 10px;
+        }
+        
+        .demo-card iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .demo-card p {
+            margin: 10px 0;
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        .demo-card a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #B946D6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .demo-card a:hover {
+            background: #D55BF0;
+        }
+        
+        .intro {
+            max-width: 1400px;
+            margin: 0 auto 40px;
+            text-align: center;
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+        }
+        
+        .intro p {
+            color: #ccc;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #B946D6;
+        }
+        
+        .feature h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+        
+        .feature ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .feature li {
+            padding: 5px 0;
+            color: #ccc;
+        }
+        
+        .feature li:before {
+            content: "✓ ";
+            color: #00FF00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎴 Oh Hell! Card Game - Demostración Completa 🎴</h1>
+    
+    <div class="intro">
+        <h2>Interfaz Web Completa Basada en Prototipo Figma</h2>
+        <p>
+            Esta demostración muestra todas las pantallas del juego de cartas "Oh Hell!" 
+            implementadas siguiendo fielmente el diseño del prototipo de Figma proporcionado.
+        </p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🎨 Diseño</h3>
+                <ul>
+                    <li>Colores fieles al prototipo</li>
+                    <li>Animaciones suaves</li>
+                    <li>Responsive design</li>
+                    <li>Efectos visuales</li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h3>🎮 Funcionalidades</h3>
+                <ul>
+                    <li>Sistema de login/registro</li>
+                    <li>Búsqueda de partidas</li>
+                    <li>Interfaz de juego completa</li>
+                    <li>Pantalla de resultados</li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h3>💻 Tecnologías</h3>
+                <ul>
+                    <li>HTML5 semántico</li>
+                    <li>CSS3 con animaciones</li>
+                    <li>JavaScript ES6+</li>
+                    <li>LocalStorage</li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h3>📱 Responsive</h3>
+                <ul>
+                    <li>Mobile optimizado</li>
+                    <li>Tablet compatible</li>
+                    <li>Desktop full-featured</li>
+                    <li>Touch friendly</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="demo-grid">
+        <div class="demo-card">
+            <h2>1. Inicio de Sesión</h2>
+            <p>Pantalla de login con ilustración de personas jugando cartas. Incluye formulario con validación y enlace a registro.</p>
+            <iframe src="login.html"></iframe>
+            <a href="login.html" target="_blank">Abrir en pantalla completa →</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>2. Registro</h2>
+            <p>Formulario de registro con campos para nombre, email y contraseña. Incluye botón de retroceso y validación.</p>
+            <iframe src="register.html"></iframe>
+            <a href="register.html" target="_blank">Abrir en pantalla completa →</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>3. Pantalla Principal</h2>
+            <p>Home del juego con el logo "Oh Hell!" y botones para crear o unirse a una partida. Diseño limpio y atractivo.</p>
+            <iframe src="home.html"></iframe>
+            <a href="home.html" target="_blank">Abrir en pantalla completa →</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>4. Búsqueda de Partida</h2>
+            <p>Pantalla con animación de carga mientras se busca una partida. Incluye spinner animado y botón de cancelar.</p>
+            <iframe src="searching.html"></iframe>
+            <a href="searching.html" target="_blank">Abrir en pantalla completa →</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>5. Mesa de Juego</h2>
+            <p>Interfaz principal del juego con 4 jugadores, cartas interactivas, carta de triunfo, y área central para jugadas.</p>
+            <iframe src="game.html"></iframe>
+            <a href="game.html" target="_blank">Abrir en pantalla completa →</a>
+        </div>
+        
+        <div class="demo-card">
+            <h2>6. Resultados</h2>
+            <p>Pantalla de victoria con animaciones de fuegos artificiales y opciones para volver al inicio o ver estadísticas.</p>
+            <iframe src="results.html"></iframe>
+            <a href="results.html" target="_blank">Abrir en pantalla completa →</a>
+        </div>
+    </div>
+    
+    <div class="intro" style="margin-top: 50px;">
+        <h2>📋 Archivos del Proyecto</h2>
+        <p>El proyecto incluye los siguientes archivos:</p>
+        <ul style="text-align: left; max-width: 600px; margin: 20px auto; color: #ccc;">
+            <li style="padding: 8px 0;">✅ <strong>index.html</strong> - Punto de entrada con redirección automática</li>
+            <li style="padding: 8px 0;">✅ <strong>login.html</strong> - Pantalla de inicio de sesión</li>
+            <li style="padding: 8px 0;">✅ <strong>register.html</strong> - Pantalla de registro</li>
+            <li style="padding: 8px 0;">✅ <strong>home.html</strong> - Pantalla principal del juego</li>
+            <li style="padding: 8px 0;">✅ <strong>searching.html</strong> - Búsqueda de partida</li>
+            <li style="padding: 8px 0;">✅ <strong>game.html</strong> - Interfaz del juego</li>
+            <li style="padding: 8px 0;">✅ <strong>results.html</strong> - Pantalla de resultados</li>
+            <li style="padding: 8px 0;">✅ <strong>styles.css</strong> - Todos los estilos (12KB)</li>
+            <li style="padding: 8px 0;">✅ <strong>game.js</strong> - Lógica del juego (6.5KB)</li>
+            <li style="padding: 8px 0;">✅ <strong>README.md</strong> - Documentación completa</li>
+        </ul>
+        
+        <h2 style="margin-top: 30px;">🚀 Próximos Pasos</h2>
+        <p>Para integrar con el backend Java:</p>
+        <ol style="text-align: left; max-width: 600px; margin: 20px auto; color: #ccc;">
+            <li style="padding: 8px 0;">Conectar formularios de login/registro con API REST</li>
+            <li style="padding: 8px 0;">Implementar WebSockets para comunicación en tiempo real</li>
+            <li style="padding: 8px 0;">Sincronizar estado del juego con el servidor</li>
+            <li style="padding: 8px 0;">Agregar validación de jugadas desde el backend</li>
+            <li style="padding: 8px 0;">Implementar sistema de salas y matchmaking</li>
+        </ol>
+    </div>
+</body>
+</html>

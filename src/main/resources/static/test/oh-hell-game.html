@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! - Juego de Cartas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+<header class="header">
+    <h1 class="title">OH HELL!</h1>
+    <div class="nav-menu">
+        <button onclick="newGame()">🎮 Nuevo Juego</button>
+        <button onclick="showRules()">📖 Reglas</button>
+        <button onclick="showStats()">📊 Estadísticas</button>
+        <button onclick="toggleMultiplayer()">👥 Multijugador</button>
+        <button onclick="showOptions()">⚙️ Opciones</button>
+    </div>
+</header>
+
+<main class="game-container">
+    <div class="game-table" id="gameTable">
+        <div class="player player-bottom" id="player1">
+            <div class="player-avatar" style="background: linear-gradient(45deg, #f093fb, #f5576c);">🧑</div>
+            <div class="player-name">Tú</div>
+            <div class="player-score">0/0</div>
+            <div class="player-hand" id="playerHand"></div>
+        </div>
+
+        <div class="player player-top" id="player2">
+            <div class="player-avatar" style="background: linear-gradient(45deg, #4facfe, #00f2fe);">🤖</div>
+            <div class="player-name">Bill</div>
+            <div class="player-score">0/0</div>
+            <div class="player-hand" id="player2Hand"></div>
+        </div>
+
+        <div class="player player-left" id="player3">
+            <div class="player-avatar" style="background: linear-gradient(45deg, #fa709a, #fee140);">👨</div>
+            <div class="player-name">Mike</div>
+            <div class="player-score">0/0</div>
+            <div class="player-hand" id="player3Hand"></div>
+        </div>
+
+        <div class="player player-right" id="player4">
+            <div class="player-avatar" style="background: linear-gradient(45deg, #30cfd0, #330867);">👩</div>
+            <div class="player-name">Lisa</div>
+            <div class="player-score">0/0</div>
+            <div class="player-hand" id="player4Hand"></div>
+        </div>
+
+        <div class="center-area">
+            <button class="deal-button" id="dealButton" onclick="dealCards()">Repartir</button>
+            <div class="deck" id="deckArea" style="display: none;">
+                <div class="trump-indicator" id="trumpIndicator">El triunfo es ♠</div>
+                <img id="trumpCard" class="card-img trump-card" alt="Carta de triunfo">
+                <img src="/assets/cards/png/back-red.png" class="card-img card-back" alt="Dorso de carta">
+
+            </div>
+            <div class="played-cards" id="playedCards"></div>
+        </div>
+
+        <div class="score-table" id="scoreTable" style="display:none;">
+            <h3>Puntuación</h3>
+            <table>
+                <thead><tr><th>Jugador</th><th>Puntos</th></tr></thead>
+                <tbody>
+                <tr><td>Tú</td><td>0</td></tr>
+                <tr><td>Mike</td><td>0</td></tr>
+                <tr><td>Bill</td><td>0</td></tr>
+                <tr><td>Lisa</td><td>0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="message" id="gameMessage" style="display:none;"></div>
+    </div>
+</main>
+
+<div class="bid-modal" id="bidModal">
+    <div class="bid-content">
+        <h2 class="bid-title">🎯 ¿Cuál es tu apuesta?</h2>
+        <div class="bid-info">
+            <p>El palo de triunfo es: <strong id="trumpSuit">♦ Diamantes</strong></p>
+            <p>Elige cuántas bazas crees que podrás tomar</p>
+        </div>
+        <div class="bid-buttons" id="bidButtons"></div>
+    </div>
+</div>
+</body>
+</html>

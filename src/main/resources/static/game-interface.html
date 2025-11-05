@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! Game - Juego</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Modal de Apuestas */
+        .bet-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bet-modal.active {
+            display: flex;
+        }
+
+        .bet-modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .bet-modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .bet-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .bet-info p {
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .bet-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bet-button {
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid #B946D6;
+            background: white;
+            color: #B946D6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .bet-button:hover:not(.forbidden) {
+            background: #B946D6;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .bet-button.forbidden {
+            background: #dc3545;
+            color: white;
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #dc3545;
+        }
+
+        .bet-warning {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <span class="header-title">GAME INTERFACE</span>
+            <div class="game-info">
+                <span id="roundInfo">Ronda 1/19</span>
+                <span id="cardsInfo">10 cartas</span>
+            </div>
+        </header>
+
+        <!-- Modal de Apuestas (RF-07, RF-08) -->
+        <div class="bet-modal" id="betModal">
+            <div class="bet-modal-content">
+                <h2>🎯 Realiza tu Apuesta</h2>
+                
+                <div class="bet-info">
+                    <p><strong>Cartas en mano:</strong> <span id="cardsInHand">0</span></p>
+                    <p><strong>Palo de triunfo:</strong> <span id="trumpSuitDisplay">-</span></p>
+                    <p><strong>Apuestas actuales:</strong> <span id="currentBets">0</span></p>
+                    <p id="lastBettorWarning" class="bet-warning" style="display: none;">
+                        ⚠️ Eres el último en apostar. No puedes apostar <span id="forbiddenBet">0</span> (equilibraría el total).
+                    </p>
+                </div>
+
+                <p style="margin-bottom: 15px; color: #666;">
+                    ¿Cuántas bazas crees que ganarás?
+                </p>
+
+                <div class="bet-buttons" id="betButtons">
+                    <!-- Los botones se generarán dinámicamente -->
+                </div>
+
+                <div id="betTimer" style="color: #999; font-size: 14px;">
+                    Tiempo restante: <span id="timerValue">30</span>s
+                </div>
+            </div>
+        </div>
+
+        <div class="game-table">
+            <!-- Jugador Superior -->
+            <div class="player player-top" id="player-0">
+                <div class="player-info">
+                    <button class="user-icon-btn">
+                        <svg width="40" height="40" viewBox="0 0 40 40">
+                            <circle cx="20" cy="20" r="18" fill="white" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="15" r="6" fill="#333"/>
+                            <path d="M 8 32 Q 8 24 20 24 Q 32 24 32 32" fill="#333"/>
+                        </svg>
+                    </button>
+                    <div class="points">
+                        <span class="player-name-label"></span>
+                        <span class="bet-display">Apuesta: <span class="bet-value">?</span></span>
+                        <span class="tricks-display">Bazas: <span class="tricks-won">0/0</span></span>
+                        <span class="points-label">Puntos</span>
+                        <span class="points-value">0</span>
+                    </div>
+                </div>
+                <div class="player-cards player-cards-top">
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                </div>
+            </div>
+
+            <!-- Trump Card (RF-06) -->
+            <div class="trump-container">
+                <div class="card card-front trump-card" id="trumpCard">
+                    <span class="card-value">?</span>
+                    <span class="card-suit">?</span>
+                </div>
+            </div>
+
+            <!-- Jugador Izquierdo -->
+            <div class="player player-left" id="player-1">
+                <div class="player-info">
+                    <button class="user-icon-btn">
+                        <svg width="40" height="40" viewBox="0 0 40 40">
+                            <circle cx="20" cy="20" r="18" fill="white" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="15" r="6" fill="#333"/>
+                            <path d="M 8 32 Q 8 24 20 24 Q 32 24 32 32" fill="#333"/>
+                        </svg>
+                    </button>
+                    <div class="points">
+                        <span class="player-name-label"></span>
+                        <span class="bet-display">Apuesta: <span class="bet-value">?</span></span>
+                        <span class="tricks-display">Bazas: <span class="tricks-won">0/0</span></span>
+                        <span class="points-label">Puntos</span>
+                        <span class="points-value">0</span>
+                    </div>
+                </div>
+                <div class="player-cards player-cards-left">
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                </div>
+            </div>
+
+            <!-- Centro de la mesa (RF-18) -->
+            <div class="table-center">
+                <div class="played-cards" id="playedCards">
+                    <!-- Las cartas jugadas aparecerán aquí -->
+                </div>
+            </div>
+
+            <!-- Jugador Derecho -->
+            <div class="player player-right" id="player-2">
+                <div class="player-info">
+                    <button class="user-icon-btn">
+                        <svg width="40" height="40" viewBox="0 0 40 40">
+                            <circle cx="20" cy="20" r="18" fill="white" stroke="#333" stroke-width="2"/>
+                            <circle cx="20" cy="15" r="6" fill="#333"/>
+                            <path d="M 8 32 Q 8 24 20 24 Q 32 24 32 32" fill="#333"/>
+                        </svg>
+                    </button>
+                    <div class="points">
+                        <span class="player-name-label"></span>
+                        <span class="bet-display">Apuesta: <span class="bet-value">?</span></span>
+                        <span class="tricks-display">Bazas: <span class="tricks-won">0/0</span></span>
+                        <span class="points-label">Puntos</span>
+                        <span class="points-value">0</span>
+                    </div>
+                </div>
+                <div class="player-cards player-cards-right">
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                    <div class="card card-back"></div>
+                </div>
+            </div>
+
+            <!-- Jugador Inferior (Usuario actual) RF-17 -->
+            <div class="player player-bottom" id="player-current">
+                <div class="player-info player-info-bottom">
+                    <div class="turn-indicator" id="turnIndicator" style="display: none;">
+                        <svg width="50" height="50" viewBox="0 0 50 50">
+                            <path d="M 25 10 L 35 25 L 25 40 L 15 25 Z" fill="#7CFC00" stroke="#333" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="points">
+                        <span class="player-name-label"></span>
+                        <span class="bet-display">Apuesta: <span class="bet-value">?</span></span>
+                        <span class="tricks-display">Bazas: <span class="tricks-won">0/0</span></span>
+                        <span class="points-label">Puntos</span>
+                        <span class="points-value">0</span>
+                    </div>
+                </div>
+                <div class="player-cards player-cards-bottom" id="playerHand">
+                    <!-- Las cartas del jugador se cargarán aquí -->
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <span class="version">Ver.Prototype</span>
+        </footer>
+    </div>
+
+    <!-- Incluir librerías necesarias -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="card-mapper.js"></script>
+    <script src="game-updated.js"></script>
+    
+    <script>
+        // RF-07: Lógica de apuestas
+        let betTimer = null;
+
+        // Mostrar modal de apuestas
+        function showBetModal(gameState) {
+            const modal = document.getElementById('betModal');
+            const cardsInHand = gameState.cardsPerPlayer;
+            
+            // Actualizar información
+            document.getElementById('cardsInHand').textContent = cardsInHand;
+            document.getElementById('trumpSuitDisplay').textContent = getSuitSymbol(gameState.trumpSuit);
+            
+            // Calcular apuestas actuales
+            const currentBets = gameState.players
+                .filter(p => p.bet !== null)
+                .reduce((sum, p) => sum + p.bet, 0);
+            document.getElementById('currentBets').textContent = currentBets;
+
+            // RF-08: Determinar si es el último apostador
+            const bettorsCount = gameState.players.filter(p => p.bet !== null).length;
+            const isLastBettor = bettorsCount === gameState.players.length - 1;
+            
+            let forbiddenBet = null;
+            if (isLastBettor) {
+                forbiddenBet = cardsInHand - currentBets;
+                document.getElementById('lastBettorWarning').style.display = 'block';
+                document.getElementById('forbiddenBet').textContent = forbiddenBet;
+            } else {
+                document.getElementById('lastBettorWarning').style.display = 'none';
+            }
+
+            // Generar botones de apuesta
+            const buttonsContainer = document.getElementById('betButtons');
+            buttonsContainer.innerHTML = '';
+            
+            for (let i = 0; i <= cardsInHand; i++) {
+                const button = document.createElement('button');
+                button.className = 'bet-button';
+                button.textContent = i;
+                
+                // RF-08: Marcar apuesta prohibida
+                if (isLastBettor && i === forbiddenBet) {
+                    button.classList.add('forbidden');
+                    button.disabled = true;
+                    button.title = 'Esta apuesta equilibraría el total de bazas';
+                } else {
+                    button.onclick = () => placeBet(i);
+                }
+                
+                buttonsContainer.appendChild(button);
+            }
+
+            // Mostrar modal
+            modal.classList.add('active');
+
+            // Iniciar temporizador (30 segundos)
+            startBetTimer(30);
+        }
+
+        function startBetTimer(seconds) {
+            let timeLeft = seconds;
+            const timerDisplay = document.getElementById('timerValue');
+            
+            betTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(betTimer);
+                    // Apuesta automática de 0 si se acaba el tiempo
+                    placeBet(0);
+                }
+            }, 1000);
+        }
+
+        function placeBet(bet) {
+            // Limpiar temporizador
+            if (betTimer) {
+                clearInterval(betTimer);
+            }
+
+            // Enviar apuesta
+            gameManager.placeBet(bet);
+
+            // Ocultar modal
+            document.getElementById('betModal').classList.remove('active');
+        }
+
+        // Inicializar cuando cargue el juego
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('gameId');
+            
+            if (!gameId) {
+                window.location.href = 'home.html';
+                return;
+            }
+
+            // Cargar estado inicial y conectar WebSocket
+            loadGameAndConnect(gameId);
+        });
+
+        async function loadGameAndConnect(gameId) {
+            try {
+                // Cargar estado del juego
+                const response = await fetch(`${CONFIG.API_BASE_URL}/games/${gameId}/state`);
+                const gameState = await response.json();
+                
+                // Actualizar interfaz
+                gameManager.updateGameState(gameState);
+
+                // Si está en fase de apuestas y es nuestro turno, mostrar modal
+                if (gameState.phase === 'BETTING' && gameState.currentTurn === gameManager.currentPlayer.id) {
+                    showBetModal(gameState);
+                }
+            } catch (error) {
+                console.error('Error loading game:', error);
+                showError('Error al cargar el juego');
+            }
+        }
+    </script>
+</body>
+</html>

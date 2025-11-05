@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! Game - Índice del Proyecto</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #B946D6;
+        }
+        
+        h1 {
+            color: #B946D6;
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: block;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .card p {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .file-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .file-list ul {
+            list-style: none;
+        }
+        
+        .file-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #B946D6;
+        }
+        
+        .file-list li strong {
+            color: #B946D6;
+            margin-right: 10px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .alert {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .alert-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎴 Oh Hell! Card Game</h1>
+            <p class="subtitle">Interfaz Web Completa - Proyecto Finalizado</p>
+        </header>
+        
+        <div class="alert">
+            <span class="alert-icon">✅</span>
+            <strong>¡Proyecto Completado!</strong> Todas las pantallas del prototipo Figma han sido implementadas con HTML, CSS y JavaScript.
+        </div>
+        
+        <div class="section">
+            <h2>🎯 Acceso Rápido</h2>
+            <div class="card-grid">
+                <a href="demo.html" class="card">
+                    <h3>📺 Ver Demostración</h3>
+                    <p>Visualiza todas las pantallas en una sola página</p>
+                </a>
+                
+                <a href="index.html" class="card">
+                    <h3>🚀 Iniciar Aplicación</h3>
+                    <p>Comienza desde el punto de entrada del juego</p>
+                </a>
+                
+                <a href="RESUMEN_PROYECTO.md" class="card">
+                    <h3>📋 Resumen del Proyecto</h3>
+                    <p>Documentación detallada de todo lo implementado</p>
+                </a>
+                
+                <a href="README.md" class="card">
+                    <h3>📖 README Técnico</h3>
+                    <p>Guía técnica completa del proyecto</p>
+                </a>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🎨 Pantallas Individuales</h2>
+            <div class="card-grid">
+                <a href="login.html" class="card">
+                    <h3>🔐 Login</h3>
+                    <p>Pantalla de inicio de sesión</p>
+                </a>
+                
+                <a href="register.html" class="card">
+                    <h3>✍️ Registro</h3>
+                    <p>Formulario de registro de usuarios</p>
+                </a>
+                
+                <a href="home.html" class="card">
+                    <h3>🏠 Home</h3>
+                    <p>Pantalla principal del juego</p>
+                </a>
+                
+                <a href="searching.html" class="card">
+                    <h3>🔍 Búsqueda</h3>
+                    <p>Búsqueda de partida con animación</p>
+                </a>
+                
+                <a href="game.html" class="card">
+                    <h3>🎮 Juego</h3>
+                    <p>Mesa de juego con 4 jugadores</p>
+                </a>
+                
+                <a href="results.html" class="card">
+                    <h3>🏆 Resultados</h3>
+                    <p>Pantalla de victoria</p>
+                </a>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📊 Estadísticas del Proyecto</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Páginas HTML</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12KB</div>
+                    <div class="stat-label">CSS</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">6.5KB</div>
+                    <div class="stat-label">JavaScript</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Completo</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📁 Archivos del Proyecto</h2>
+            <div class="file-list">
+                <ul>
+                    <li><strong>index.html</strong> - Punto de entrada con redirección automática</li>
+                    <li><strong>login.html</strong> - Pantalla de inicio de sesión (3.6KB)</li>
+                    <li><strong>register.html</strong> - Pantalla de registro (4.4KB)</li>
+                    <li><strong>home.html</strong> - Pantalla principal (2.2KB)</li>
+                    <li><strong>searching.html</strong> - Búsqueda de partida (1.8KB)</li>
+                    <li><strong>game.html</strong> - Interfaz del juego (6.9KB)</li>
+                    <li><strong>results.html</strong> - Pantalla de resultados (1.7KB)</li>
+                    <li><strong>styles.css</strong> - Estilos completos (12KB)</li>
+                    <li><strong>game.js</strong> - Lógica del juego (6.5KB)</li>
+                    <li><strong>demo.html</strong> - Demostración de todas las pantallas (9KB)</li>
+                    <li><strong>README.md</strong> - Documentación técnica (4.8KB)</li>
+                    <li><strong>RESUMEN_PROYECTO.md</strong> - Resumen detallado (5.6KB)</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>✨ Características Implementadas</h2>
+            <div class="file-list">
+                <ul>
+                    <li>✅ Diseño fiel al prototipo Figma</li>
+                    <li>✅ Sistema de navegación completo</li>
+                    <li>✅ Animaciones y transiciones suaves</li>
+                    <li>✅ Responsive design (mobile, tablet, desktop)</li>
+                    <li>✅ Formularios con validación</li>
+                    <li>✅ Sistema de autenticación simulado</li>
+                    <li>✅ Cartas interactivas</li>
+                    <li>✅ Efectos visuales (spinner, fuegos artificiales)</li>
+                    <li>✅ Código limpio y bien documentado</li>
+                    <li>✅ Listo para integración con backend</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🚀 Próximos Pasos</h2>
+            <div class="file-list">
+                <ul>
+                    <li>🔄 Integrar con API REST Java</li>
+                    <li>🔄 Implementar WebSockets para juego en tiempo real</li>
+                    <li>🔄 Conectar con base de datos</li>
+                    <li>🔄 Añadir sistema de salas y matchmaking</li>
+                    <li>🔄 Implementar lógica completa del juego Oh Hell</li>
+                    <li>🔄 Agregar sonidos y efectos de audio</li>
+                    <li>🔄 Sistema de estadísticas y rankings</li>
+                    <li>🔄 Testing y deployment</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

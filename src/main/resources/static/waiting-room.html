@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! - Sala de Espera</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <span class="header-title">Sala de Espera</span>
+            <button class="btn-leave" onclick="leaveLobby()">Salir</button>
+        </header>
+
+        <main class="main-content waiting-room">
+            <!-- RF-22: Código de la partida -->
+            <div class="game-code-section">
+                <h2>Código de Partida</h2>
+                <div class="game-code" id="gameCode">------</div>
+                <button class="btn btn-secondary" onclick="copyGameCode()">
+                    📋 Copiar Código
+                </button>
+            </div>
+
+            <!-- RF-22: Lista de jugadores conectados -->
+            <div class="players-section">
+                <h2>Jugadores Conectados (<span id="playerCount">0</span>/7)</h2>
+                <div class="players-list" id="playersList">
+                    <!-- Los jugadores se cargarán dinámicamente -->
+                </div>
+            </div>
+
+            <!-- RF-01: Información de requisitos -->
+            <div class="requirements-section">
+                <p class="info-text">
+                    <strong>Requisitos:</strong> Se necesitan entre 3 y 7 jugadores para comenzar.
+                </p>
+            </div>
+
+            <!-- RF-22: Botón para iniciar (solo host) -->
+            <div class="button-group">
+                <button 
+                    class="btn btn-primary btn-start" 
+                    id="startButton" 
+                    onclick="startGame()" 
+                    disabled
+                >
+                    Iniciar Partida
+                </button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <span class="version">Ver.Prototype</span>
+        </footer>
+    </div>
+
+    <!-- Incluir librerías necesarias -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="game-updated.js"></script>
+    
+    <script>
+        // RF-22: Lógica de sala de espera
+        let isHost = false;
+        let currentGameId = null;
+
+        // Inicializar sala de espera
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentGameId = urlParams.get('gameId');
+
+            if (!currentGameId) {
+                window.location.href = 'home.html';
+                return;
+            }
+
+            // Mostrar código del juego
+            document.getElementById('gameCode').textContent = currentGameId;
+
+            // Cargar estado inicial
+            await loadGameState();
+
+            // Conectar WebSocket para actualizaciones en tiempo real
+            connectToLobby();
+        });
+
+        async function loadGameState() {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/games/${currentGameId}`);
+                const game = await response.json();
+
+                // Determinar si somos el host
+                const currentPlayerId = localStorage.getItem('currentPlayerId');
+                isHost = game.host?.id === currentPlayerId;
+
+                // Actualizar lista de jugadores
+                updatePlayersList(game.players);
+
+                // Habilitar botón de inicio si somos host y hay suficientes jugadores
+                updateStartButton(game.players.length);
+            } catch (error) {
+                console.error('Error loading game state:', error);
+                showError('Error al cargar la sala de espera');
+            }
+        }
+
+        function connectToLobby() {
+            // Conectar WebSocket
+            const socket = new SockJS(CONFIG.WS_URL);
+            const stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, (frame) => {
+                console.log('Connected to lobby WebSocket');
+
+                // Suscribirse a eventos de jugadores
+                stompClient.subscribe(`/topic/game/${currentGameId}/players`, (message) => {
+                    const event = JSON.parse(message.body);
+                    handlePlayerEvent(event);
+                });
+
+                // Suscribirse a inicio de juego
+                stompClient.subscribe(`/topic/game/${currentGameId}/start`, (message) => {
+                    const gameState = JSON.parse(message.body);
+                    // Redirigir a la pantalla de juego
+                    window.location.href = `game.html?gameId=${currentGameId}`;
+                });
+            });
+        }
+
+        function handlePlayerEvent(event) {
+            if (event.type === 'PLAYER_JOINED') {
+                addPlayerToList(event.player);
+                showNotification(`${event.player.name} se ha unido`);
+            } else if (event.type === 'PLAYER_LEFT') {
+                removePlayerFromList(event.playerId);
+                showNotification(`${event.playerName} ha salido`);
+            }
+
+            // Actualizar contador de jugadores
+            const playerCount = document.querySelectorAll('.player-item').length;
+            document.getElementById('playerCount').textContent = playerCount;
+            updateStartButton(playerCount);
+        }
+
+        function updatePlayersList(players) {
+            const listContainer = document.getElementById('playersList');
+            listContainer.innerHTML = '';
+
+            players.forEach((player, index) => {
+                const playerItem = createPlayerItem(player, index === 0);
+                listContainer.appendChild(playerItem);
+            });
+
+            document.getElementById('playerCount').textContent = players.length;
+        }
+
+        function createPlayerItem(player, isHost) {
+            const div = document.createElement('div');
+            div.className = 'player-item';
+            div.id = `player-${player.id}`;
+            div.innerHTML = `
+                <div class="player-avatar">
+                    <svg width="50" height="50" viewBox="0 0 50 50">
+                        <circle cx="25" cy="25" r="23" fill="#B946D6" stroke="#fff" stroke-width="2"/>
+                        <circle cx="25" cy="20" r="8" fill="#fff"/>
+                        <path d="M 10 40 Q 10 30 25 30 Q 40 30 40 40" fill="#fff"/>
+                    </svg>
+                </div>
+                <div class="player-info-lobby">
+                    <span class="player-name">${player.name}</span>
+                    ${isHost ? '<span class="host-badge">👑 Host</span>' : ''}
+                </div>
+                <div class="player-status">
+                    <span class="status-indicator ready"></span>
+                    <span class="status-text">Listo</span>
+                </div>
+            `;
+            return div;
+        }
+
+        function addPlayerToList(player) {
+            const listContainer = document.getElementById('playersList');
+            const playerItem = createPlayerItem(player, false);
+            listContainer.appendChild(playerItem);
+        }
+
+        function removePlayerFromList(playerId) {
+            const playerItem = document.getElementById(`player-${playerId}`);
+            if (playerItem) {
+                playerItem.remove();
+            }
+        }
+
+        function updateStartButton(playerCount) {
+            const startButton = document.getElementById('startButton');
+            
+            // RF-01: Mínimo 3 jugadores para iniciar
+            if (isHost && playerCount >= CONFIG.MIN_PLAYERS) {
+                startButton.disabled = false;
+                startButton.classList.add('btn-enabled');
+            } else {
+                startButton.disabled = true;
+                startButton.classList.remove('btn-enabled');
+            }
+
+            // Actualizar texto del botón
+            if (!isHost) {
+                startButton.textContent = 'Esperando al host...';
+            } else if (playerCount < CONFIG.MIN_PLAYERS) {
+                startButton.textContent = `Esperando jugadores (${playerCount}/${CONFIG.MIN_PLAYERS})`;
+            } else {
+                startButton.textContent = 'Iniciar Partida';
+            }
+        }
+
+        function copyGameCode() {
+            const gameCode = document.getElementById('gameCode').textContent;
+            navigator.clipboard.writeText(gameCode).then(() => {
+                showNotification('¡Código copiado al portapapeles!');
+            });
+        }
+
+        async function startGame() {
+            if (!isHost) {
+                showError('Solo el host puede iniciar la partida');
+                return;
+            }
+
+            try {
+                await gameManager.startGame(currentGameId);
+                // La redirección se manejará vía WebSocket
+            } catch (error) {
+                console.error('Error starting game:', error);
+                showError('Error al iniciar la partida');
+            }
+        }
+
+        function leaveLobby() {
+            if (confirm('¿Estás seguro de que quieres salir?')) {
+                // Desconectar y volver al home
+                gameManager.ws.disconnect();
+                window.location.href = 'home.html';
+            }
+        }
+    </script>
+</body>
+</html>

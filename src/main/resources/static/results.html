@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! Game - Resultados</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container results-container">
+        <header class="header">
+            <span class="header-title">Resultados</span>
+        </header>
+
+        <main class="main-content results-content">
+            <div class="fireworks fireworks-left">
+                <div class="firework"></div>
+            </div>
+
+            <div class="winner-section">
+                <button class="user-icon-btn winner-icon">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="55" fill="white" stroke="#333" stroke-width="3"/>
+                        <circle cx="60" cy="45" r="18" fill="#333"/>
+                        <path d="M 24 96 Q 24 72 60 72 Q 96 72 96 96" fill="#333"/>
+                    </svg>
+                </button>
+
+                <h2 class="winner-text">
+                    <span id="winnerName">#Nombre#</span> ganó el juego ! ! !
+                </h2>
+            </div>
+
+            <div class="fireworks fireworks-right">
+                <div class="firework"></div>
+            </div>
+        </main>
+
+        <div class="button-group results-buttons">
+            <button class="btn btn-primary" onclick="volverAlInicio()">Volver al Inicio</button>
+            <button class="btn btn-secondary" onclick="verEstadisticas()">Ver Estadísticas</button>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>

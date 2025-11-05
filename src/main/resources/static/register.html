@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! Game - Registro</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card auth-card-left">
+            <div class="auth-illustration">
+                <svg viewBox="0 0 300 200" class="people-illustration">
+                    <!-- Persona 1 -->
+                    <ellipse cx="80" cy="100" rx="25" ry="35" fill="#FF6B9D"/>
+                    <circle cx="80" cy="70" r="20" fill="#FFB4A2"/>
+                    <rect x="70" y="65" width="8" height="15" fill="#8B4513" rx="4"/>
+                    <circle cx="83" cy="62" r="3" fill="#333"/>
+                    
+                    <!-- Persona 2 -->
+                    <ellipse cx="150" cy="105" rx="25" ry="35" fill="#6C5CE7"/>
+                    <circle cx="150" cy="75" r="20" fill="#FFB4A2"/>
+                    <rect x="135" y="60" width="30" height="8" fill="#333" rx="4"/>
+                    <circle cx="155" cy="70" r="8" fill="#FFF" opacity="0.3"/>
+                    
+                    <!-- Persona 3 -->
+                    <ellipse cx="220" cy="100" rx="25" ry="35" fill="#00B894"/>
+                    <circle cx="220" cy="70" r="20" fill="#FFB4A2"/>
+                    <path d="M 210 55 L 220 60 L 230 55" stroke="#8B4513" stroke-width="3" fill="none"/>
+                    <circle cx="215" cy="68" r="3" fill="#333"/>
+                    <circle cx="225" cy="68" r="3" fill="#333"/>
+                    
+                    <!-- Mesa -->
+                    <ellipse cx="150" cy="135" rx="80" ry="15" fill="#A0522D"/>
+                    
+                    <!-- Cartas en la mesa -->
+                    <rect x="120" y="125" width="20" height="28" fill="#DC143C" rx="2"/>
+                    <rect x="145" y="125" width="20" height="28" fill="#DC143C" rx="2"/>
+                    <rect x="170" y="125" width="20" height="28" fill="#DC143C" rx="2"/>
+                </svg>
+            </div>
+
+            <h2 class="auth-title">Inicio de sesión</h2>
+            <p class="auth-subtitle">Iniciar sesion con tu cuenta de Oh Hell! Game</p>
+        </div>
+
+        <div class="auth-card auth-card-right">
+            <button class="back-button" onclick="window.location.href='login.html'">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+
+            <div class="auth-header">
+                <h2 class="auth-title-main">Registro</h2>
+                <p class="auth-subtitle-main">Iniciar sesion con tu cuenta de Oh Hell! Game</p>
+            </div>
+
+            <form class="auth-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input 
+                        type="text" 
+                        id="nombre" 
+                        class="form-input" 
+                        placeholder="John Wick"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="email-register">Email</label>
+                    <input 
+                        type="email" 
+                        id="email-register" 
+                        class="form-input" 
+                        placeholder="tonny@tuemail.com"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="password-register">Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="password-register" 
+                        class="form-input" 
+                        placeholder="Introduce tu contraseña"
+                        required
+                    />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">Crear cuenta</button>
+
+                <p class="auth-switch">
+                    ¿Ya tienes una cuenta? <a href="login.html">Inicia Sesión</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>
