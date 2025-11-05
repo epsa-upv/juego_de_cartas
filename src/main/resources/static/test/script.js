@@ -27,7 +27,7 @@ function shuffle(a){
 function createCardElement(card){
     const el=document.createElement('img');
     const file=`${card.rank.toLowerCase()}_of_${suitNames[card.suit]}.png`;
-    el.src=`src/main/resources/static/assets/cards/png/${file}`;
+    el.src = `/assets/cards/svg/${file}`;
     el.alt=`${card.rank}${card.suit}`;
     el.className='card-img';
     el.onclick=()=>playCard(0, gameState.players[0].hand.indexOf(card));
@@ -66,7 +66,9 @@ function displayHands(){
 }
 function backCard(){
     const img=document.createElement('img');
-    img.src='src/main/resources/static/assets/cards/png/back-red.png';
+    img.src = `/assets/cards/back-red.png`;
+    document.querySelector(".game-table").style.backgroundImage =
+        "url('/assets/images/imagenDeFondoDelJuego.jpg')";
     img.className='card-img';
     return img;
 }
