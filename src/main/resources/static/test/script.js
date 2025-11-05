@@ -26,8 +26,17 @@ function shuffle(a){
 
 function createCardElement(card){
     const el=document.createElement('img');
-    const file=`${card.rank.toLowerCase()}_of_${suitNames[card.suit]}.png`;
-    el.src = `/assets/cards/svg/${file}`;
+    const rankMap = {
+        'J': 'jack',
+        'Q': 'queen',
+        'K': 'king',
+        'A': 'ace'
+      };
+    
+      const rankName = rankMap[card.rank] || card.rank; 
+    
+      const file = `${rankName.toLowerCase()}_of_${suitNames[card.suit]}.png`;
+    el.src = `../assets/cards/png/${file}`;
     el.alt=`${card.rank}${card.suit}`;
     el.className='card-img';
     el.onclick=()=>playCard(0, gameState.players[0].hand.indexOf(card));
@@ -48,7 +57,7 @@ function dealCards(){
 
     const trump=gameState.deck[0];
     gameState.trumpSuit=trump.suit;
-    document.getElementById('trumpCard').src=`/assets/cards/png/${trump.rank.toLowerCase()}_of_${suitNames[trump.suit]}.png`;
+    document.getElementById('trumpCard').src='../assets/cards/png/${trump.rank.toLowerCase()}_of_${suitNames[trump.suit]}.png';
     document.getElementById('trumpIndicator').textContent=`El triunfo es ${trump.suit}`;
     displayHands();
     startBidding();
@@ -66,9 +75,7 @@ function displayHands(){
 }
 function backCard(){
     const img=document.createElement('img');
-    img.src = `/assets/cards/back-red.png`;
-    document.querySelector(".game-table").style.backgroundImage =
-        "url('/assets/images/imagenDeFondoDelJuego.jpg')";
+    img.src = '../assets/cards/png/back-red.png';
     img.className='card-img';
     return img;
 }
