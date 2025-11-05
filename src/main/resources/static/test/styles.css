@@ -1,0 +1,149 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(0,0,0,0.25);
+}
+.title {
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, #f093fb, #f5576c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+.nav-menu { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; }
+.nav-menu button {
+    background: linear-gradient(45deg, #f093fb, #f5576c);
+    border: none; color: white;
+    border-radius: 20px; padding: 0.6rem 1.4rem;
+    cursor: pointer; font-weight: bold;
+    transition: transform 0.2s;
+}
+.nav-menu button:hover { transform: scale(1.05); }
+
+/* Game table */
+.game-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+.game-table {
+    background: url("/assets/images/OhHellHomeImagen.png") center/cover no-repeat;
+    border-radius: 20px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    position: relative;
+    width: 95%;
+    max-width: 1200px;
+    min-height: 600px;
+    overflow: hidden;
+}
+
+/* Player positions */
+.player { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+.player-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
+.player-top { top: 20px; left: 50%; transform: translateX(-50%); }
+.player-left { left: 20px; top: 50%; transform: translateY(-50%); }
+.player-right { right: 20px; top: 50%; transform: translateY(-50%); }
+
+.player-avatar { width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+.player-name, .player-score {
+    background: rgba(0,0,0,0.5);
+    padding: 0.3rem 0.8rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+.player-hand { display: flex; gap: 0.3rem; margin-top: 0.3rem; }
+
+/* Cards */
+.card-img {
+    width: 60px;
+    height: auto;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.card-img:hover { transform: translateY(-8px); }
+.trump-card { border: 3px solid gold; box-shadow: 0 0 15px gold; }
+
+/* Center area */
+.center-area {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.deal-button {
+    background: linear-gradient(45deg, #48bb78, #38a169);
+    border: none; border-radius: 20px;
+    color: white; font-weight: bold;
+    padding: 1rem 2rem;
+    cursor: pointer; transition: transform 0.2s;
+}
+.deal-button:hover { transform: scale(1.05); }
+
+/* Score table */
+.score-table {
+    position: absolute; right: 20px; top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    padding: 1rem; border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+.score-table table { color: white; border-collapse: collapse; }
+.score-table th, .score-table td {
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 0.4rem 0.8rem;
+    text-align: center;
+}
+
+/* Bid modal */
+.bid-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    justify-content: center; align-items: center;
+}
+.bid-modal.active { display: flex; }
+.bid-content {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 15px; padding: 2rem; text-align: center;
+    box-shadow: 0 0 25px rgba(0,0,0,0.4);
+}
+.bid-buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+.bid-btn {
+    background: white; border: none; border-radius: 10px;
+    padding: 1rem; font-weight: bold; cursor: pointer;
+    transition: transform 0.2s;
+}
+.bid-btn:hover { transform: scale(1.1); background: gold; }
+
+/* Messages */
+.message {
+    position: absolute; bottom: 120px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    padding: 1rem 2rem; border-radius: 10px;
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-img { width: 45px; }
+    .title { font-size: 1.8rem; }
+    .bid-buttons { grid-template-columns: repeat(3, 1fr); }
+}

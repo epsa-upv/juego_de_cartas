@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! - Juego de Cartas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-menu button {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-menu button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Game Table */
+        .game-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .game-table {
+            background: radial-gradient(ellipse at center, #2d3748, #1a202c);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            min-height: 600px;
+            position: relative;
+        }
+
+        /* Players */
+        .player {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-name {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .player-score {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .player-hand {
+            display: flex;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
+        }
+
+        .player-bid {
+            background: #f6d55c;
+            color: #1a202c;
+            padding: 0.3rem 0.6rem;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 0.3rem;
+        }
+
+        /* Player positions */
+        .player-bottom {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .player-top {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .player-left {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .player-right {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Cards */
+        .card {
+            width: 50px;
+            height: 70px;
+            background: white;
+            border: 2px solid #2d3748;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card.red {
+            color: #e53e3e;
+        }
+
+        .card.black {
+            color: #1a202c;
+        }
+
+        .card-back {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: transparent;
+        }
+
+        .card-back::after {
+            content: '🎴';
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        /* Center area */
+        .center-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .deck {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .trump-card {
+            border: 3px solid #f6d55c;
+            box-shadow: 0 0 20px rgba(246, 213, 92, 0.5);
+        }
+
+        .trump-indicator {
+            background: linear-gradient(45deg, #f6d55c, #ffd93d);
+            color: #1a202c;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .played-cards {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Deal button */
+        .deal-button {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .deal-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Bid modal */
+        .bid-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bid-modal.active {
+            display: flex;
+        }
+
+        .bid-content {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .bid-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .bid-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .bid-buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+
+        .bid-btn {
+            background: white;
+            color: #1a202c;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bid-btn:hover {
+            background: #f6d55c;
+            transform: scale(1.1);
+        }
+
+        /* Score table */
+        .score-table {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .score-table table {
+            color: white;
+            border-collapse: collapse;
+        }
+
+        .score-table th,
+        .score-table td {
+            padding: 0.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-table th {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Message */
+        .message {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+
+            .game-table {
+                padding: 1rem;
+                min-height: 400px;
+            }
+
+            .card {
+                width: 40px;
+                height: 56px;
+                font-size: 1rem;
+            }
+
+            .player-avatar {
+                width: 50px;
+                height: 50px;
+            }
+
+            .bid-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1 class="title">OH HELL!</h1>
+        <div class="nav-menu">
+            <button onclick="newGame()">🎮 Nuevo Juego</button>
+            <button onclick="showRules()">📖 Reglas</button>
+            <button onclick="showStats()">📊 Estadísticas</button>
+            <button onclick="toggleMultiplayer()">👥 Multijugador</button>
+            <button onclick="showOptions()">⚙️ Opciones</button>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container">
+        <div class="game-table" id="gameTable">
+            <!-- Players -->
+            <div class="player player-bottom" id="player1">
+                <div class="player-avatar" style="background: linear-gradient(45deg, #f093fb, #f5576c);">🧑</div>
+                <div class="player-name">Tú</div>
+                <div class="player-score">0/1</div>
+                <div class="player-hand" id="playerHand"></div>
+            </div>
+
+            <div class="player player-top" id="player2">
+                <div class="player-avatar" style="background: linear-gradient(45deg, #4facfe, #00f2fe);">🤖</div>
+                <div class="player-name">Bill</div>
+                <div class="player-score">0/3</div>
+                <div class="player-hand" id="player2Hand"></div>
+            </div>
+
+            <div class="player player-left" id="player3">
+                <div class="player-avatar" style="background: linear-gradient(45deg, #fa709a, #fee140);">👨</div>
+                <div class="player-name">Mike</div>
+                <div class="player-score">0/1</div>
+                <div class="player-hand" id="player3Hand"></div>
+            </div>
+
+            <div class="player player-right" id="player4">
+                <div class="player-avatar" style="background: linear-gradient(45deg, #30cfd0, #330867);">👩</div>
+                <div class="player-name">Lisa</div>
+                <div class="player-score">0/4</div>
+                <div class="player-hand" id="player4Hand"></div>
+            </div>
+
+            <!-- Center Area -->
+            <div class="center-area">
+                <button class="deal-button" id="dealButton" onclick="dealCards()">Repartir</button>
+                <div class="deck" id="deckArea" style="display: none;">
+                    <div class="trump-indicator" id="trumpIndicator">El triunfo es ♠</div>
+                    <div class="card trump-card" id="trumpCard"></div>
+                    <div class="card card-back"></div>
+                </div>
+                <div class="played-cards" id="playedCards"></div>
+            </div>
+
+            <!-- Score Table -->
+            <div class="score-table" style="display: none;" id="scoreTable">
+                <h3>Puntuación</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Jugador</th>
+                            <th>Puntos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Tú</td><td>18</td></tr>
+                        <tr><td>Mike</td><td>13</td></tr>
+                        <tr><td>Bill</td><td>3</td></tr>
+                        <tr><td>Lisa</td><td>25</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Message -->
+            <div class="message" id="gameMessage" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Bid Modal -->
+    <div class="bid-modal" id="bidModal">
+        <div class="bid-content">
+            <h2 class="bid-title">🎯 ¿Cuál es tu apuesta?</h2>
+            <div class="bid-info">
+                <p>El palo de triunfo es: <strong id="trumpSuit">♦ Diamantes</strong></p>
+                <p>Elige cuántas bazas crees que podrás tomar</p>
+            </div>
+            <div class="bid-buttons" id="bidButtons">
+                <!-- Buttons will be generated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Card definitions
+        const suits = ['♠', '♣', '♥', '♦'];
+        const suitNames = {
+            '♠': 'Picas',
+            '♣': 'Tréboles', 
+            '♥': 'Corazones',
+            '♦': 'Diamantes'
+        };
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        
+        // Game state
+        let gameState = {
+            round: 1,
+            maxCards: 10,
+            currentCards: 10,
+            trumpSuit: null,
+            players: [
+                { id: 1, name: 'Tú', hand: [], bid: null, tricks: 0, score: 0 },
+                { id: 2, name: 'Bill', hand: [], bid: null, tricks: 0, score: 0 },
+                { id: 3, name: 'Mike', hand: [], bid: null, tricks: 0, score: 0 },
+                { id: 4, name: 'Lisa', hand: [], bid: null, tricks: 0, score: 0 }
+            ],
+            currentPlayer: 0,
+            playedCards: [],
+            deck: []
+        };
+
+        // Create deck
+        function createDeck() {
+            const deck = [];
+            for (let suit of suits) {
+                for (let rank of ranks) {
+                    deck.push({ suit, rank, value: ranks.indexOf(rank) + 2 });
+                }
+            }
+            return shuffleDeck(deck);
+        }
+
+        // Shuffle deck
+        function shuffleDeck(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            return deck;
+        }
+
+        // Deal cards
+        function dealCards() {
+            // Hide deal button and show deck
+            document.getElementById('dealButton').style.display = 'none';
+            document.getElementById('deckArea').style.display = 'flex';
+            
+            // Create and shuffle deck
+            gameState.deck = createDeck();
+            
+            // Calculate cards per player
+            const cardsPerPlayer = Math.floor(gameState.currentCards / 4);
+            
+            // Deal cards to each player
+            gameState.players.forEach((player, index) => {
+                player.hand = [];
+                player.bid = null;
+                player.tricks = 0;
+                
+                for (let i = 0; i < cardsPerPlayer; i++) {
+                    player.hand.push(gameState.deck.pop());
+                }
+                
+                // Sort hand
+                player.hand.sort((a, b) => {
+                    if (a.suit !== b.suit) {
+                        return suits.indexOf(a.suit) - suits.indexOf(b.suit);
+                    }
+                    return a.value - b.value;
+                });
+            });
+            
+            // Set trump card
+            const trumpCard = gameState.deck[0];
+            gameState.trumpSuit = trumpCard.suit;
+            
+            // Display trump card
+            const trumpCardEl = document.getElementById('trumpCard');
+            trumpCardEl.innerHTML = `
+                <span class="${trumpCard.suit === '♥' || trumpCard.suit === '♦' ? 'red' : 'black'}">
+                    ${trumpCard.rank}${trumpCard.suit}
+                </span>
+            `;
+            
+            document.getElementById('trumpIndicator').textContent = `El triunfo es ${trumpCard.suit}`;
+            
+            // Display hands
+            displayHands();
+            
+            // Start bidding
+            setTimeout(() => {
+                startBidding();
+            }, 1000);
+        }
+
+        // Display hands
+        function displayHands() {
+            // Player 1 (human)
+            const playerHand = document.getElementById('playerHand');
+            playerHand.innerHTML = '';
+            gameState.players[0].hand.forEach((card, index) => {
+                const cardEl = createCardElement(card);
+                cardEl.onclick = () => playCard(0, index);
+                playerHand.appendChild(cardEl);
+            });
+            
+            // Other players (show card backs)
+            for (let i = 1; i <= 3; i++) {
+                const handEl = document.getElementById(`player${i+1}Hand`);
+                handEl.innerHTML = '';
+                gameState.players[i].hand.forEach(() => {
+                    const cardBack = document.createElement('div');
+                    cardBack.className = 'card card-back';
+                    handEl.appendChild(cardBack);
+                });
+            }
+        }
+
+        // Create card element
+        function createCardElement(card) {
+            const cardEl = document.createElement('div');
+            cardEl.className = `card ${card.suit === '♥' || card.suit === '♦' ? 'red' : 'black'}`;
+            cardEl.innerHTML = `
+                <span>${card.rank}</span>
+                <span>${card.suit}</span>
+            `;
+            return cardEl;
+        }
+
+        // Start bidding
+        function startBidding() {
+            // Show bid modal for human player
+            const modal = document.getElementById('bidModal');
+            const trumpSuitEl = document.getElementById('trumpSuit');
+            trumpSuitEl.textContent = `${gameState.trumpSuit} ${suitNames[gameState.trumpSuit]}`;
+            
+            // Create bid buttons
+            const bidButtons = document.getElementById('bidButtons');
+            bidButtons.innerHTML = '';
+            const maxBid = gameState.players[0].hand.length;
+            
+            for (let i = 0; i <= maxBid; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'bid-btn';
+                btn.textContent = i;
+                btn.onclick = () => makeBid(i);
+                bidButtons.appendChild(btn);
+            }
+            
+            modal.classList.add('active');
+            
+            // AI players make bids
+            for (let i = 1; i < 4; i++) {
+                const bid = Math.floor(Math.random() * (gameState.players[i].hand.length + 1));
+                gameState.players[i].bid = bid;
+                updatePlayerDisplay(i);
+            }
+        }
+
+        // Make bid
+        function makeBid(bid) {
+            gameState.players[0].bid = bid;
+            document.getElementById('bidModal').classList.remove('active');
+            updatePlayerDisplay(0);
+            
+            // Show message
+            showMessage('¡Las apuestas están hechas! Empecemos a jugar.');
+            
+            // Start playing
+            setTimeout(() => {
+                hideMessage();
+                // Game logic would continue here
+            }, 2000);
+        }
+
+        // Update player display
+        function updatePlayerDisplay(playerIndex) {
+            const player = gameState.players[playerIndex];
+            const playerEl = document.getElementById(`player${playerIndex + 1}`);
+            const scoreEl = playerEl.querySelector('.player-score');
+            
+            if (player.bid !== null) {
+                scoreEl.textContent = `${player.tricks}/${player.bid}`;
+                
+                // Add bid indicator
+                if (!playerEl.querySelector('.player-bid')) {
+                    const bidEl = document.createElement('div');
+                    bidEl.className = 'player-bid';
+                    bidEl.textContent = `Apuesta: ${player.bid}`;
+                    playerEl.insertBefore(bidEl, playerEl.querySelector('.player-hand'));
+                }
+            }
+        }
+
+        // Play card (basic implementation)
+        function playCard(playerIndex, cardIndex) {
+            if (playerIndex !== gameState.currentPlayer) return;
+            
+            const player = gameState.players[playerIndex];
+            const card = player.hand[cardIndex];
+            
+            // Add card to played cards
+            const playedCardsEl = document.getElementById('playedCards');
+            const cardEl = createCardElement(card);
+            playedCardsEl.appendChild(cardEl);
+            
+            // Remove card from hand
+            player.hand.splice(cardIndex, 1);
+            displayHands();
+            
+            // Next player
+            gameState.currentPlayer = (gameState.currentPlayer + 1) % 4;
+            
+            // Check if trick is complete
+            if (playedCardsEl.children.length === 4) {
+                setTimeout(() => {
+                    // Clear played cards
+                    playedCardsEl.innerHTML = '';
+                    // Logic for determining trick winner would go here
+                }, 2000);
+            }
+        }
+
+        // Show message
+        function showMessage(text) {
+            const messageEl = document.getElementById('gameMessage');
+            messageEl.textContent = text;
+            messageEl.style.display = 'block';
+        }
+
+        // Hide message
+        function hideMessage() {
+            document.getElementById('gameMessage').style.display = 'none';
+        }
+
+        // New game
+        function newGame() {
+            // Reset game state
+            gameState.round = 1;
+            gameState.currentCards = 10;
+            gameState.players.forEach(player => {
+                player.hand = [];
+                player.bid = null;
+                player.tricks = 0;
+                player.score = 0;
+            });
+            
+            // Clear display
+            document.getElementById('playerHand').innerHTML = '';
+            document.getElementById('player2Hand').innerHTML = '';
+            document.getElementById('player3Hand').innerHTML = '';
+            document.getElementById('player4Hand').innerHTML = '';
+            document.getElementById('playedCards').innerHTML = '';
+            document.getElementById('deckArea').style.display = 'none';
+            document.getElementById('dealButton').style.display = 'block';
+            
+            // Remove bid indicators
+            document.querySelectorAll('.player-bid').forEach(el => el.remove());
+            
+            // Reset scores
+            document.querySelectorAll('.player-score').forEach((el, i) => {
+                el.textContent = '0/0';
+            });
+            
+            showMessage('¡Nuevo juego iniciado! Haz clic en Repartir para comenzar.');
+            setTimeout(hideMessage, 2000);
+        }
+
+        // Show rules
+        function showRules() {
+            alert(`REGLAS DE OH HELL!
+            
+1. Se reparten cartas a cada jugador (el número varía por ronda)
+2. Se muestra una carta de triunfo
+3. Cada jugador apuesta cuántas bazas ganará
+4. Se juegan las bazas siguiendo el palo inicial
+5. El triunfo gana sobre otros palos
+6. Puntuación:
+   - Si aciertas tu apuesta: 10 + número de bazas
+   - Si fallas: 0 puntos
+7. ¡Gana quien tenga más puntos al final!`);
+        }
+
+        // Show stats
+        function showStats() {
+            document.getElementById('scoreTable').style.display = 'block';
+        }
+
+        // Toggle multiplayer
+        function toggleMultiplayer() {
+            alert('¡Modo multijugador próximamente!');
+        }
+
+        // Show options
+        function showOptions() {
+            alert('Opciones:\n- Velocidad del juego\n- Dificultad de la IA\n- Temas visuales\n- Sonidos\n\n(Próximamente)');
+        }
+
+        // Initialize
+        window.onload = function() {
+            showMessage('¡Bienvenido a Oh Hell! Haz clic en "Nuevo Juego" para empezar.');
+            setTimeout(hideMessage, 3000);
+        };
+    </script>
+</body>
+</html>
