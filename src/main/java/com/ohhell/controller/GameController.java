@@ -1,4 +1,0 @@
-package com.ohhell.controller;
-
-public class GameController {
-}
