@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oh Hell! API - UPV</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .status {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        #status {
+            font-weight: bold;
+            color: #333;
+        }
+        h2 {
+            color: #333;
+            margin: 30px 0 20px 0;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .endpoint-group {
+            margin-bottom: 30px;
+        }
+        .endpoint {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .endpoint:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+            margin-right: 10px;
+        }
+        .get { background: #61affe; color: white; }
+        .post { background: #49cc90; color: white; }
+        .put { background: #fca130; color: white; }
+        .delete { background: #f93e3e; color: white; }
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .endpoint-desc {
+            color: #666;
+            margin-top: 8px;
+            font-size: 0.95em;
+        }
+        a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .success { color: #49cc90; }
+        .error { color: #f93e3e; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🃏 Oh Hell! API</h1>
+    <p class="subtitle">API REST para el juego de cartas Oh Hell - Universitat Politècnica de València</p>
+
+    <div class="status">
+        <p id="status">🔄 Verificando estado del servidor...</p>
+    </div>
+
+    <!-- Endpoints de Sistema -->
+    <h2>📡 Sistema</h2>
+    <div class="endpoint-group">
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <a href="api/v1/hello" target="_blank" class="endpoint-path">/api/v1/hello</a>
+            <p class="endpoint-desc">Endpoint de prueba - Verifica que la API está funcionando</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <a href="api/v1/testdb" target="_blank" class="endpoint-path">/api/v1/testdb</a>
+            <p class="endpoint-desc">Prueba de conexión a PostgreSQL en Render</p>
+        </div>
+    </div>
+
+    <!-- Endpoints de Players -->
+    <h2>👥 Jugadores (Players)</h2>
+    <div class="endpoint-group">
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <a href="api/v1/players" target="_blank" class="endpoint-path">/api/v1/players</a>
+            <p class="endpoint-desc">Obtiene la lista de todos los jugadores</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/players/{id}</span>
+            <p class="endpoint-desc">Obtiene un jugador específico por ID</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/v1/players</span>
+            <p class="endpoint-desc">Crea un nuevo jugador</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method put">PUT</span>
+            <span class="endpoint-path">/api/v1/players/{id}</span>
+            <p class="endpoint-desc">Actualiza un jugador existente</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method delete">DELETE</span>
+            <span class="endpoint-path">/api/v1/players/{id}</span>
+            <p class="endpoint-desc">Elimina un jugador</p>
+        </div>
+    </div>
+
+    <!-- Endpoints de Games -->
+    <h2>🎮 Partidas (Games)</h2>
+    <div class="endpoint-group">
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <a href="api/v1/games" target="_blank" class="endpoint-path">/api/v1/games</a>
+            <p class="endpoint-desc">Obtiene la lista de todas las partidas</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/games/{id}</span>
+            <p class="endpoint-desc">Obtiene una partida específica por ID</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/v1/games</span>
+            <p class="endpoint-desc">Crea una nueva partida</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/v1/games/{id}/join</span>
+            <p class="endpoint-desc">Un jugador se une a una partida</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method put">PUT</span>
+            <span class="endpoint-path">/api/v1/games/{id}</span>
+            <p class="endpoint-desc">Actualiza una partida</p>
+        </div>
+    </div>
+
+    <!-- Endpoints de Rounds -->
+    <h2>🔄 Rondas (Rounds)</h2>
+    <div class="endpoint-group">
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/rounds/game/{gameId}</span>
+            <p class="endpoint-desc">Obtiene todas las rondas de una partida</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/rounds/{id}</span>
+            <p class="endpoint-desc">Obtiene una ronda específica</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/v1/rounds</span>
+            <p class="endpoint-desc">Crea una nueva ronda</p>
+        </div>
+    </div>
+
+    <!-- Endpoints de Bids -->
+    <h2>💰 Apuestas (Bids)</h2>
+    <div class="endpoint-group">
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/bids/round/{roundId}</span>
+            <p class="endpoint-desc">Obtiene todas las apuestas de una ronda</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/v1/bids</span>
+            <p class="endpoint-desc">Crea una nueva apuesta</p>
+        </div>
+    </div>
+
+    <!-- Endpoints de Tricks -->
+    <h2>🎴 Bazas (Tricks)</h2>
+    <div class="endpoint-group">
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/v1/tricks/round/{roundId}</span>
+            <p class="endpoint-desc">Obtiene todas las bazas de una ronda</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/v1/tricks</span>
+            <p class="endpoint-desc">Crea una nueva baza</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/v1/tricks/{id}/play</span>
+            <p class="endpoint-desc">Juega una carta en una baza</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Oh Hell! Card Game</strong></p>
+        <p>Proyecto desarrollado por el equipo de Tomás Criado García</p>
+        <p>Universitat Politècnica de València - Sprint 3</p>
+    </div>
+</div>
+
+<script>
+    // Verificar estado del servidor
+    fetch('api/v1/hello')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('status').innerHTML =
+                '<span class="success">✅ Servidor funcionando correctamente</span><br>' +
+                '<small>Respuesta: ' + data + '</small>';
+        })
+        .catch(error => {
+            document.getElementById('status').innerHTML =
+                '<span class="error">❌ Error conectando con el servidor</span>';
+        });
+</script>
+</body>
+</html>
