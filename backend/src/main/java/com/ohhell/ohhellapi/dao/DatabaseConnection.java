@@ -5,12 +5,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * DatabaseConnection - Gestión de conexión a PostgreSQL
+ * DatabaseConnection - Gestión centralizada de conexión a PostgreSQL
  *
  * Oh Hell! Card Game - UPV
  * Autor: Tomás Criado García
  *
- * Esta clase proporciona conexiones independientes para evitar problemas de concurrencia
+ * Esta clase proporciona una conexión singleton a la base de datos PostgreSQL
+ * alojada en Render.
  */
 public class DatabaseConnection {
 
@@ -19,16 +20,17 @@ public class DatabaseConnection {
     private static final String DB_USER = "ohhell_user";
     private static final String DB_PASSWORD = "iMi5lFilip6ih2K0b8xygiM13EyQfbkT";
 
+    private static Connection connection = null;
+
     /**
-     * Constructor privado para evitar instanciación
+     * Constructor privado para patrón Singleton
      */
     private DatabaseConnection() {
         // Impedir instanciación
     }
 
     /**
-     * Obtiene una NUEVA conexión a la base de datos PostgreSQL
-     * Cada llamada devuelve una conexión independiente para evitar conflictos de concurrencia
+     * Obtiene una conexión a la base de datos PostgreSQL
      *
      * @return Connection objeto de conexión a la BD
      * @throws SQLException si hay error en la conexión
@@ -38,10 +40,13 @@ public class DatabaseConnection {
             // Cargar el driver de PostgreSQL
             Class.forName("org.postgresql.Driver");
 
-            // Crear y devolver NUEVA conexión cada vez
-            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            System.out.println("✓ Nueva conexión establecida con PostgreSQL");
-            return conn;
+            // Si no hay conexión o está cerrada, crear nueva
+            if (connection == null || connection.isClosed()) {
+                connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+                System.out.println("✓ Conexión establecida con PostgreSQL en Render");
+            }
+
+            return connection;
 
         } catch (ClassNotFoundException e) {
             System.err.println("✗ Error: Driver PostgreSQL no encontrado");
@@ -49,6 +54,33 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             System.err.println("✗ Error al conectar con PostgreSQL: " + e.getMessage());
             throw e;
+        }
+    }
+
+    /**
+     * Cierra la conexión a la base de datos
+     */
+    public static void closeConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+                System.out.println("✓ Conexión cerrada correctamente");
+            }
+        } catch (SQLException e) {
+            System.err.println("✗ Error al cerrar conexión: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Verifica si la conexión está activa
+     *
+     * @return true si la conexión está activa, false en caso contrario
+     */
+    public static boolean isConnectionActive() {
+        try {
+            return connection != null && !connection.isClosed();
+        } catch (SQLException e) {
+            return false;
         }
     }
 }

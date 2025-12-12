@@ -50,43 +50,12 @@ public class RoundDAO {
      * @throws SQLException si hay error en la consulta
      */
     public Round getRoundById(Long id) throws SQLException {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException("ID de ronda inválido: " + id);
-        }
-
         String query = "SELECT * FROM rounds WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setLong(1, id);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToRound(rs);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Obtiene una ronda específica de una partida por su número
-     *
-     * @param gameId ID de la partida
-     * @param roundNumber Número de la ronda
-     * @return Round objeto, o null si no existe
-     * @throws SQLException si hay error en la consulta
-     */
-    public Round getRoundByNumber(Long gameId, int roundNumber) throws SQLException {
-        String query = "SELECT * FROM rounds WHERE game_id = ? AND round_number = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setLong(1, gameId);
-            pstmt.setInt(2, roundNumber);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -135,7 +104,6 @@ public class RoundDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     round.setId(rs.getLong("id"));
-                    round.setStatus("BIDDING");
                     return round;
                 }
             }
@@ -177,7 +145,7 @@ public class RoundDAO {
      * Actualiza el estado de una ronda
      *
      * @param roundId ID de la ronda
-     * @param status Nuevo estado ("BIDDING", "PLAYING", "COMPLETED")
+     * @param status Nuevo estado
      * @return true si se actualizó correctamente
      * @throws SQLException si hay error en la actualización
      */
@@ -189,35 +157,6 @@ public class RoundDAO {
 
             pstmt.setString(1, status);
             pstmt.setLong(2, roundId);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-
-    /**
-     * Actualiza la carta de triunfo de una ronda
-     *
-     * @param roundId ID de la ronda
-     * @param trump Carta de triunfo
-     * @return true si se actualizó correctamente
-     * @throws SQLException si hay error en la actualización
-     */
-    public boolean updateTrump(Long roundId, Card trump) throws SQLException {
-        String query = "UPDATE rounds SET trump_suit = ?, trump_rank = ? WHERE id = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            if (trump != null) {
-                pstmt.setString(1, trump.getSuit());
-                pstmt.setString(2, trump.getRank());
-            } else {
-                pstmt.setNull(1, Types.VARCHAR);
-                pstmt.setNull(2, Types.VARCHAR);
-            }
-
-            pstmt.setLong(3, roundId);
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -245,24 +184,6 @@ public class RoundDAO {
     }
 
     /**
-     * Elimina todas las rondas de una partida
-     *
-     * @param gameId ID de la partida
-     * @return Número de rondas eliminadas
-     * @throws SQLException si hay error en la eliminación
-     */
-    public int deleteRoundsByGameId(Long gameId) throws SQLException {
-        String query = "DELETE FROM rounds WHERE game_id = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setLong(1, gameId);
-            return pstmt.executeUpdate();
-        }
-    }
-
-    /**
      * Obtiene la ronda actual de una partida
      *
      * @param gameId ID de la partida
@@ -271,32 +192,6 @@ public class RoundDAO {
      */
     public Round getCurrentRound(Long gameId) throws SQLException {
         String query = "SELECT * FROM rounds WHERE game_id = ? AND status IN ('BIDDING', 'PLAYING') " +
-                "ORDER BY round_number DESC LIMIT 1";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setLong(1, gameId);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToRound(rs);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Obtiene la última ronda completada de una partida
-     *
-     * @param gameId ID de la partida
-     * @return Round objeto de la última ronda completada, o null si no hay
-     * @throws SQLException si hay error en la consulta
-     */
-    public Round getLastCompletedRound(Long gameId) throws SQLException {
-        String query = "SELECT * FROM rounds WHERE game_id = ? AND status = 'COMPLETED' " +
                 "ORDER BY round_number DESC LIMIT 1";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -340,6 +235,40 @@ public class RoundDAO {
     }
 
     /**
+     * Mapea un ResultSet a un objeto Round
+     *
+     * @param rs ResultSet con los datos de la ronda
+     * @return Round objeto mapeado
+     * @throws SQLException si hay error al leer los datos
+     */
+    private Round mapResultSetToRound(ResultSet rs) throws SQLException {
+        Round round = new Round();
+        round.setId(rs.getLong("id"));
+        round.setGameId(rs.getLong("game_id"));
+        round.setRoundNumber(rs.getInt("round_number"));
+        round.setNumCards(rs.getInt("num_cards"));
+
+        String trumpSuit = rs.getString("trump_suit");
+        String trumpRank = rs.getString("trump_rank");
+
+        if (trumpSuit != null && trumpRank != null) {
+            Card trump = new Card(
+                    Card.Suit.valueOf(trumpSuit).toString().toString(),
+                    Card.Rank.valueOf(trumpRank).toString().toString()
+            );
+            round.setTrump(trump);
+        }
+
+        Long dealerId = rs.getLong("dealer_id");
+        if (!rs.wasNull()) {
+            round.setDealerId(dealerId);
+        }
+
+        round.setStatus(rs.getString("status"));
+
+        return round;
+    }
+    /**
      * Obtiene el número de la última ronda de una partida
      *
      * @param gameId ID de la partida
@@ -363,73 +292,36 @@ public class RoundDAO {
 
         return 0;
     }
+    public Round findById(Long id) throws SQLException {
+        return getRoundById(id);
+    }
 
+    public Round save(Round round) throws SQLException {
+        return createRound(round);
+    }
     /**
-     * Obtiene rondas por estado
+     * Obtiene la última ronda completada de una partida
      *
      * @param gameId ID de la partida
-     * @param status Estado de la ronda
-     * @return Lista de rondas con ese estado
+     * @return Round objeto de la última ronda completada, o null si no hay
      * @throws SQLException si hay error en la consulta
      */
-    public List<Round> getRoundsByStatus(Long gameId, String status) throws SQLException {
-        List<Round> rounds = new ArrayList<>();
-        String query = "SELECT * FROM rounds WHERE game_id = ? AND status = ? ORDER BY round_number";
+    public Round getLastCompletedRound(Long gameId) throws SQLException {
+        String query = "SELECT * FROM rounds WHERE game_id = ? AND status = 'COMPLETED' " +
+                "ORDER BY round_number DESC LIMIT 1";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setLong(1, gameId);
-            pstmt.setString(2, status);
 
             try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    rounds.add(mapResultSetToRound(rs));
+                if (rs.next()) {
+                    return mapResultSetToRound(rs);
                 }
             }
         }
 
-        return rounds;
-    }
-
-    /**
-     * Mapea un ResultSet a un objeto Round
-     *
-     * @param rs ResultSet con los datos de la ronda
-     * @return Round objeto mapeado
-     * @throws SQLException si hay error al leer los datos
-     */
-    private Round mapResultSetToRound(ResultSet rs) throws SQLException {
-        Round round = new Round();
-        round.setId(rs.getLong("id"));
-        round.setGameId(rs.getLong("game_id"));
-        round.setRoundNumber(rs.getInt("round_number"));
-        round.setNumCards(rs.getInt("num_cards"));
-
-        String trumpSuit = rs.getString("trump_suit");
-        String trumpRank = rs.getString("trump_rank");
-
-        // ✅ CORREGIDO: Sin doble .toString()
-        if (trumpSuit != null && trumpRank != null) {
-            // Opción 1: Si el constructor de Card acepta Strings directamente
-            Card trump = new Card(trumpSuit, trumpRank);
-            round.setTrump(trump);
-
-            // Opción 2: Si el constructor de Card acepta Enums, usa esto en su lugar:
-            // Card trump = new Card(
-            //     Card.Suit.valueOf(trumpSuit),
-            //     Card.Rank.valueOf(trumpRank)
-            // );
-            // round.setTrump(trump);
-        }
-
-        Long dealerId = rs.getLong("dealer_id");
-        if (!rs.wasNull()) {
-            round.setDealerId(dealerId);
-        }
-
-        round.setStatus(rs.getString("status"));
-
-        return round;
+        return null;
     }
 }

@@ -46,10 +46,6 @@ public class PlayerDAO {
      * @throws SQLException si hay error en la consulta
      */
     public Player getPlayerById(Long id) throws SQLException {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException("ID de jugador inválido: " + id);
-        }
-
         String query = "SELECT * FROM players WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -75,10 +71,6 @@ public class PlayerDAO {
      * @throws SQLException si hay error en la consulta
      */
     public Player getPlayerByName(String name) throws SQLException {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nombre de jugador inválido");
-        }
-
         String query = "SELECT * FROM players WHERE name = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -192,48 +184,6 @@ public class PlayerDAO {
     }
 
     /**
-     * Decrementa una vida de un jugador
-     *
-     * @param playerId ID del jugador
-     * @return true si se actualizó correctamente
-     * @throws SQLException si hay error en la actualización
-     */
-    public boolean decrementPlayerLife(Long playerId) throws SQLException {
-        String query = "UPDATE players SET lives = lives - 1 WHERE id = ? AND lives > 0";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setLong(1, playerId);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-
-    /**
-     * Actualiza el estado de un jugador
-     *
-     * @param playerId ID del jugador
-     * @param status Nuevo estado
-     * @return true si se actualizó correctamente
-     * @throws SQLException si hay error en la actualización
-     */
-    public boolean updatePlayerStatus(Long playerId, Player.PlayerStatus status) throws SQLException {
-        String query = "UPDATE players SET status = ? WHERE id = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setString(1, status.name());
-            pstmt.setLong(2, playerId);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-
-    /**
      * Obtiene jugadores por estado
      *
      * @param status Estado del jugador (ACTIVE, ELIMINATED, WAITING)
@@ -259,6 +209,22 @@ public class PlayerDAO {
         return players;
     }
 
+    /**
+     * Mapea un ResultSet a un objeto Player
+     *
+     * @param rs ResultSet con los datos del jugador
+     * @return Player objeto mapeado
+     * @throws SQLException si hay error al leer los datos
+     */
+    private Player mapResultSetToPlayer(ResultSet rs) throws SQLException {
+        Player player = new Player();
+        player.setId(rs.getLong("id"));
+        player.setName(rs.getString("name"));
+        player.setLives(rs.getInt("lives"));
+        player.setStatus(Player.PlayerStatus.valueOf(rs.getString("status")));
+        player.setDealer(rs.getBoolean("is_dealer"));
+        return player;
+    }
     /**
      * Obtiene todos los jugadores de una partida específica
      *
@@ -289,17 +255,17 @@ public class PlayerDAO {
     }
 
     /**
-     * Obtiene jugadores activos de una partida
+     * Obtiene jugadores activos de una partida (con vidas > 0)
      *
      * @param gameId ID de la partida
      * @return Lista de jugadores activos
      * @throws SQLException si hay error en la consulta
      */
     public List<Player> getActivePlayersByGameId(Long gameId) throws SQLException {
-        List<Player> players = new ArrayList<>();
+        List<Player> activePlayers = new ArrayList<>();
         String query = "SELECT p.* FROM players p " +
                 "INNER JOIN game_players gp ON p.id = gp.player_id " +
-                "WHERE gp.game_id = ? AND p.status = 'ACTIVE' " +
+                "WHERE gp.game_id = ? AND p.status = 'ACTIVE' AND p.lives > 0 " +
                 "ORDER BY gp.join_order";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -309,14 +275,16 @@ public class PlayerDAO {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    players.add(mapResultSetToPlayer(rs));
+                    activePlayers.add(mapResultSetToPlayer(rs));
                 }
             }
         }
 
-        return players;
+        return activePlayers;
     }
-
+    public Player findById(Long id) throws SQLException {
+        return getPlayerById(id);
+    }
     /**
      * Establece el dealer de una partida
      *
@@ -369,47 +337,5 @@ public class PlayerDAO {
                 }
             }
         }
-    }
-
-    /**
-     * Verifica si un nombre de jugador ya existe
-     *
-     * @param name Nombre del jugador
-     * @return true si el nombre ya existe
-     * @throws SQLException si hay error en la consulta
-     */
-    public boolean existsPlayerByName(String name) throws SQLException {
-        String query = "SELECT COUNT(*) as count FROM players WHERE name = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setString(1, name);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("count") > 0;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Mapea un ResultSet a un objeto Player
-     *
-     * @param rs ResultSet con los datos del jugador
-     * @return Player objeto mapeado
-     * @throws SQLException si hay error al leer los datos
-     */
-    private Player mapResultSetToPlayer(ResultSet rs) throws SQLException {
-        Player player = new Player();
-        player.setId(rs.getLong("id"));
-        player.setName(rs.getString("name"));
-        player.setLives(rs.getInt("lives"));
-        player.setStatus(Player.PlayerStatus.valueOf(rs.getString("status")));
-        player.setDealer(rs.getBoolean("is_dealer"));
-        return player;
     }
 }

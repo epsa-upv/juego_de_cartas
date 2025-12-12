@@ -47,10 +47,6 @@ public class GameDAO {
      * @throws SQLException si hay error en la consulta
      */
     public Game getGameById(Long id) throws SQLException {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException("ID de partida inválido: " + id);
-        }
-
         String query = "SELECT * FROM games WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -153,40 +149,18 @@ public class GameDAO {
      * Actualiza el estado de una partida
      *
      * @param gameId ID de la partida
-     * @param status Nuevo estado ("WAITING", "IN_PROGRESS", "FINISHED")
+     * @param status Nuevo estado
      * @return true si se actualizó correctamente
      * @throws SQLException si hay error en la actualización
      */
-    public boolean updateGameStatus(Long gameId, String status) throws SQLException {
+    public boolean updateGameStatus(Long gameId, Game.GameStatus status) throws SQLException {
         String query = "UPDATE games SET status = ? WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setString(1, status);
+            pstmt.setString(1, status.name());
             pstmt.setLong(2, gameId);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-
-    /**
-     * Inicia una partida cambiando su estado a IN_PROGRESS
-     *
-     * @param gameId ID de la partida
-     * @return true si se actualizó correctamente
-     * @throws SQLException si hay error en la actualización
-     */
-    public boolean startGame(Long gameId) throws SQLException {
-        String query = "UPDATE games SET status = ? WHERE id = ? AND status = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setString(1, "IN_PROGRESS");
-            pstmt.setLong(2, gameId);
-            pstmt.setString(3, "WAITING");
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -207,7 +181,7 @@ public class GameDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setString(1, "FINISHED");
+            pstmt.setString(1, Game.GameStatus.FINISHED.name());
             pstmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
 
             if (winnerId != null) {
@@ -238,36 +212,6 @@ public class GameDAO {
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setString(1, status);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    games.add(mapResultSetToGame(rs));
-                }
-            }
-        }
-
-        return games;
-    }
-
-    /**
-     * Obtiene partidas disponibles para unirse (WAITING y no llenas)
-     *
-     * @return Lista de partidas disponibles
-     * @throws SQLException si hay error en la consulta
-     */
-    public List<Game> getAvailableGames() throws SQLException {
-        List<Game> games = new ArrayList<>();
-        String query = "SELECT g.* FROM games g " +
-                "LEFT JOIN (SELECT game_id, COUNT(*) as player_count " +
-                "           FROM game_players GROUP BY game_id) gp " +
-                "ON g.id = gp.game_id " +
-                "WHERE g.status = ? AND (gp.player_count < g.max_players OR gp.player_count IS NULL) " +
-                "ORDER BY g.created_at DESC";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-            pstmt.setString(1, "WAITING");
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -332,26 +276,47 @@ public class GameDAO {
         game.setName(rs.getString("name"));
         game.setMaxPlayers(rs.getInt("max_players"));
         game.setInitialLives(rs.getInt("initial_lives"));
-        game.setStatus(rs.getString("status"));
+        game.setStatus((rs.getString("status")));
 
-        // Mapear winner_id (puede ser null)
-        long winnerId = rs.getLong("winner_id");
-        if (!rs.wasNull()) {
-            game.setWinnerId(winnerId);
-        }
-
-        // Mapear created_at
         Timestamp createdAt = rs.getTimestamp("created_at");
         if (createdAt != null) {
             game.setCreatedAt(createdAt.toLocalDateTime());
         }
 
-        // Mapear finished_at (puede ser null)
         Timestamp finishedAt = rs.getTimestamp("finished_at");
         if (finishedAt != null) {
             game.setFinishedAt(finishedAt.toLocalDateTime());
         }
 
         return game;
+    }
+    /**
+     * Obtiene partidas disponibles para unirse (WAITING y no llenas)
+     *
+     * @return Lista de partidas disponibles
+     * @throws SQLException si hay error en la consulta
+     */
+    public List<Game> getAvailableGames() throws SQLException {
+        List<Game> games = new ArrayList<>();
+        String query = "SELECT g.* FROM games g " +
+                "LEFT JOIN (SELECT game_id, COUNT(*) as player_count " +
+                "           FROM game_players GROUP BY game_id) gp " +
+                "ON g.id = gp.game_id " +
+                "WHERE g.status = ? AND (gp.player_count < g.max_players OR gp.player_count IS NULL) " +
+                "ORDER BY g.created_at DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, "WAITING");
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    games.add(mapResultSetToGame(rs));
+                }
+            }
+        }
+
+        return games;
     }
 }

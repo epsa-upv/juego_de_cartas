@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <Resource id="ohhell_postgres" type="DataSource">
+        JdbcDriver = org.postgresql.Driver
+        JdbcUrl = jdbc:postgresql://dpg-ct3g5bdsvqrc73874o10-a.oregon-postgres.render.com:5432/ohhell_db
+        UserName = [TU_USUARIO_DE_POSTGRES]
+        Password = [TU_CONTRASEÑA]
+        JtaManaged = true
+        TestOnBorrow = true
+        ValidationQuery = SELECT 1
+    </Resource>
+</resources>

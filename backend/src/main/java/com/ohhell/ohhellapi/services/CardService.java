@@ -1,4 +1,4 @@
-package com.ohhell.ohhellapi.Services;
+package com.ohhell.ohhellapi.services;
 
 import com.ohhell.ohhellapi.models.Card;
 import java.util.*;

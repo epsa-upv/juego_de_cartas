@@ -1,46 +1,81 @@
 package com.ohhell.ohhellapi.models;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "bids")
 public class Bid {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long bidId;
+
+    @Column(name = "player_id", nullable = false)
     private Long playerId;
+
+    @Column(name = "round_id", nullable = false)
     private Long roundId;
-    private int bidValue;
+
+    @Column(name = "bid_amount", nullable = false)
     private int bidAmount;
-    private int tricksWon;
+
+    @Column(name = "tricks_won", nullable = false)
+    private int tricksWon = 0;
+
+    @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
-    
+
+    // Constructor vacío (OBLIGATORIO para JPA)
     public Bid() {
-        this.tricksWon = 0;
         this.timestamp = LocalDateTime.now();
+        this.tricksWon = 0;
     }
-    
-    public Bid(Long playerId, int bidValue) {
+
+    // Constructor para crear apuesta
+    public Bid(Long playerId, int bidAmount) {
         this();
         this.playerId = playerId;
-        this.bidValue = bidValue;
-        this.bidAmount = bidValue;
+        this.bidAmount = bidAmount;
     }
-    
-    public Long getId() { return id != null ? id : bidId; }
-    public void setId(Long id) { this.id = id; this.bidId = id; }
-    public Long getBidId() { return bidId != null ? bidId : id; }
-    public void setBidId(Long bidId) { this.bidId = bidId; this.id = bidId; }
+
+    // Constructor completo
+    public Bid(Long playerId, Long roundId, int bidAmount) {
+        this();
+        this.playerId = playerId;
+        this.roundId = roundId;
+        this.bidAmount = bidAmount;
+    }
+
+    // --- GETTERS Y SETTERS (SIMPLE) ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
     public Long getPlayerId() { return playerId; }
     public void setPlayerId(Long playerId) { this.playerId = playerId; }
+
     public Long getRoundId() { return roundId; }
     public void setRoundId(Long roundId) { this.roundId = roundId; }
-    public int getBidValue() { return bidValue != 0 ? bidValue : bidAmount; }
-    public void setBidValue(int bidValue) { this.bidValue = bidValue; this.bidAmount = bidValue; }
-    public int getBidAmount() { return bidAmount != 0 ? bidAmount : bidValue; }
-    public void setBidAmount(int bidAmount) { this.bidAmount = bidAmount; this.bidValue = bidAmount; }
+
+    public int getBidAmount() { return bidAmount; }
+    public void setBidAmount(int bidAmount) { this.bidAmount = bidAmount; }
+
     public int getTricksWon() { return tricksWon; }
     public void setTricksWon(int tricksWon) { this.tricksWon = tricksWon; }
+
     public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
-    
+
+    // --- MÉTODOS DE NEGOCIO ---
     public void incrementTricksWon() { this.tricksWon++; }
-    public boolean isBidMet() { return getBidValue() == this.tricksWon; }
+
+    public boolean isBidMet() { return this.bidAmount == this.tricksWon; }
+
+    public int getDifference() { return Math.abs(this.bidAmount - this.tricksWon); }
+
+    @Override
+    public String toString() {
+        return "Bid{id=" + id + ", playerId=" + playerId +
+                ", bidAmount=" + bidAmount + ", tricksWon=" + tricksWon + "}";
+    }
 }

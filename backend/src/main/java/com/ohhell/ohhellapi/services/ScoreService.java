@@ -1,4 +1,4 @@
-package com.ohhell.ohhellapi.Services;
+package com.ohhell.ohhellapi.services;
 
 import com.ohhell.ohhellapi.dao.PlayerDAO;
 import com.ohhell.ohhellapi.dao.GameDAO;
@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import java.util.stream.Collectors;
 
 /**
@@ -237,7 +239,10 @@ public class ScoreService {
      * @throws SQLException si hay error en BD
      */
     public Player determineWinner(Long gameId) throws SQLException {
-        List<Player> activePlayers = playerDAO.getActivePlayersByGameId(gameId);
+        List<Player> allPlayers = playerDAO.getPlayersByGameId(gameId);
+        List<Player> activePlayers = allPlayers.stream()
+                .filter(p -> p.getLives() > 0 && p.getStatus() == Player.PlayerStatus.ACTIVE)
+                .collect(Collectors.toList());
 
         // Si no hay jugadores activos
         if (activePlayers.isEmpty()) {
@@ -500,4 +505,30 @@ public class ScoreService {
         private final int totalLivesLost;
         private final List<RoundStats> roundStats;
 
-        public PlayerStats(Long playerId, String playerName, int currentL
+        public PlayerStats(Long playerId, String playerName, int currentLives,
+                           int initialLives, int roundsPlayed, int roundsWon,
+                           int totalLivesLost, List<RoundStats> roundStats) {
+            this.playerId = playerId;
+            this.playerName = playerName;
+            this.currentLives = currentLives;
+            this.initialLives = initialLives;
+            this.roundsPlayed = roundsPlayed;
+            this.roundsWon = roundsWon;
+            this.totalLivesLost = totalLivesLost;
+            this.roundStats = roundStats;
+        }
+
+        public Long getPlayerId() { return playerId; }
+        public String getPlayerName() { return playerName; }
+        public int getCurrentLives() { return currentLives; }
+        public int getInitialLives() { return initialLives; }
+        public int getRoundsPlayed() { return roundsPlayed; }
+        public int getRoundsWon() { return roundsWon; }
+        public int getTotalLivesLost() { return totalLivesLost; }
+        public List<RoundStats> getRoundStats() { return roundStats; }
+
+        public double getAccuracy() {
+            return roundsPlayed > 0 ? (double) roundsWon / roundsPlayed * 100 : 0;
+        }
+    }
+}

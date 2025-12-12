@@ -1,4 +1,4 @@
-package com.ohhell.ohhellapi.Services;
+package com.ohhell.ohhellapi.services;
 
 import com.ohhell.ohhellapi.dao.TrickDAO;
 import com.ohhell.ohhellapi.dao.RoundDAO;
@@ -9,6 +9,7 @@ import com.ohhell.ohhellapi.models.Round;
 import com.ohhell.ohhellapi.models.Player;
 import com.ohhell.ohhellapi.models.Card;
 import com.ohhell.ohhellapi.models.Bid;
+import java.util.stream.Collectors;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -196,7 +197,10 @@ public class TrickService {
         if (round == null) return false;
 
         // Obtener jugadores activos
-        List<Player> activePlayers = playerDAO.getActivePlayersByGameId(round.getGameId());
+        List<Player> allPlayers = playerDAO.getPlayersByGameId(round.getGameId());
+        List<Player> activePlayers = allPlayers.stream()
+                .filter(p -> p.getLives() > 0 && p.getStatus() == Player.PlayerStatus.ACTIVE)
+                .collect(Collectors.toList());
 
         // Obtener cartas jugadas
         Map<Long, Card> cardsInTrick = trickCards.get(trickId);
