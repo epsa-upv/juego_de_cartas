@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Resultados - Oh Hell! Game">
+    <title>Resultados - Oh Hell!</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div class="page-container">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="container">
+                <div class="navbar-content">
+                    <a href="home.html" class="navbar-brand">
+                        <span class="navbar-logo">🎴</span>
+                        OH HELL!
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido Principal -->
+        <div class="content-wrapper">
+            <div class="results-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="card-title text-center">🏆 Resultados Finales</h1>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Sección del ganador -->
+                        <div class="winner-section">
+                            <div class="winner-icon">👑</div>
+                            <h2 class="mb-md">¡Ganador!</h2>
+                            <div class="winner-name" id="winner-name">Jugador</div>
+                        </div>
+
+                        <!-- Lista de resultados -->
+                        <div class="results-list" id="results-container">
+                            <!-- Los resultados se cargarán dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button class="btn btn-primary btn-lg btn-full" id="back-to-home">
+                            🏠 Volver al Inicio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p class="footer-text">Oh Hell! Game © 2025 - Tomás Engonga Ovono Nsuga</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/waiting-room.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

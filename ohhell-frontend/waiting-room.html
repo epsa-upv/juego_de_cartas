@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Espera - Oh Hell!</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<div class="page-container">
+
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <span class="navbar-brand">🎴 OH HELL!</span>
+            <button class="btn btn-danger btn-sm" onclick="salir()">Salir</button>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="waiting-room-container">
+            <h1 class="waiting-title">Sala de Espera</h1>
+            <p>Código de partida:</p>
+            <h2 id="gameCode">----</h2>
+
+            <button class="btn btn-primary btn-lg" onclick="startGame()">
+                Iniciar Partida
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const params = new URLSearchParams(location.search);
+    const gameId = params.get('gameId');
+    document.getElementById('gameCode').textContent = gameId;
+
+    function startGame() {
+        location.href = `game.html?gameId=${gameId}`;
+    }
+
+    function salir() {
+        location.href = 'home.html';
+    }
+</script>
+
+</body>
+</html>
