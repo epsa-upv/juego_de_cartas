@@ -131,4 +131,31 @@ public class BetDAO {
         return bets;
     }
 
+    public int countBets(long roundId) {
+        String sql = "SELECT COUNT(*) FROM oh_hell.bets WHERE round_id = ?";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, roundId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int sumBets(long roundId) {
+        String sql = "SELECT COALESCE(SUM(bet_value), 0) FROM oh_hell.bets WHERE round_id = ?";
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, roundId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

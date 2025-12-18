@@ -10,6 +10,9 @@ public class GamePlayerDAO {
 
     private static final int MAX_PLAYERS = 4;
 
+    // =========================
+    // HOST
+    // =========================
     public void addHost(UUID gameId, UUID playerId) {
 
         String sql = """
@@ -30,6 +33,39 @@ public class GamePlayerDAO {
         }
     }
 
+    // =========================
+    // JOIN GAME
+    // =========================
+    public void joinGame(UUID gameId, UUID playerId) {
+
+        if (countPlayers(gameId) >= MAX_PLAYERS) {
+            throw new RuntimeException("La partida está llena");
+        }
+
+        int seat = nextSeat(gameId);
+
+        String sql = """
+            INSERT INTO oh_hell.game_players
+            (game_id, player_id, seat_position, is_host, status)
+            VALUES (?, ?, ?, false, CAST('PENDING' AS player_status))
+        """;
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ps.setObject(2, playerId);
+            ps.setInt(3, seat);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // =========================
+    // READY / UNREADY
+    // =========================
     public void setReady(UUID gameId, UUID playerId, boolean ready) {
 
         String sql = """
@@ -44,7 +80,6 @@ public class GamePlayerDAO {
             ps.setString(1, ready ? "ACTIVE" : "PENDING");
             ps.setObject(2, gameId);
             ps.setObject(3, playerId);
-
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -52,6 +87,9 @@ public class GamePlayerDAO {
         }
     }
 
+    // =========================
+    // LOBBY
+    // =========================
     public List<GamePlayerView> getLobbyPlayers(UUID gameId) {
 
         String sql = """
@@ -92,6 +130,9 @@ public class GamePlayerDAO {
         return list;
     }
 
+    // =========================
+    // CHECKS
+    // =========================
     public boolean isHost(UUID gameId, UUID playerId) {
 
         String sql = """
@@ -140,10 +181,10 @@ public class GamePlayerDAO {
     public long getGamePlayerId(UUID gameId, UUID playerId) {
 
         String sql = """
-        SELECT id
-        FROM oh_hell.game_players
-        WHERE game_id = ? AND player_id = ?
-    """;
+            SELECT id
+            FROM oh_hell.game_players
+            WHERE game_id = ? AND player_id = ?
+        """;
 
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -163,4 +204,60 @@ public class GamePlayerDAO {
         }
     }
 
+    public int countPlayers(UUID gameId) {
+
+        String sql = """
+            SELECT COUNT(*)
+            FROM oh_hell.game_players
+            WHERE game_id = ?
+        """;
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // =========================
+    // SEATS
+    // =========================
+    private int nextSeat(UUID gameId) {
+
+        String sql = """
+            SELECT seat_position
+            FROM oh_hell.game_players
+            WHERE game_id = ?
+        """;
+
+        Set<Integer> usedSeats = new HashSet<>();
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                usedSeats.add(rs.getInt("seat_position"));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            if (!usedSeats.contains(i)) {
+                return i;
+            }
+        }
+
+        throw new RuntimeException("No hay asientos disponibles");
+    }
 }
