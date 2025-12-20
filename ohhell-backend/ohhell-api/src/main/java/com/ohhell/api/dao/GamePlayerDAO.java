@@ -260,4 +260,130 @@ public class GamePlayerDAO {
 
         throw new RuntimeException("No hay asientos disponibles");
     }
+
+    public int getSeat(UUID gameId, UUID playerId) {
+        String sql = """
+        SELECT seat_position
+        FROM oh_hell.game_players
+        WHERE game_id = ? AND player_id = ?
+    """;
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ps.setObject(2, playerId);
+
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) {
+                throw new RuntimeException("Jugador no está en la partida");
+            }
+
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getSeatByGamePlayerId(long gamePlayerId) {
+
+        String sql = """
+        SELECT seat_position
+        FROM oh_hell.game_players
+        WHERE id = ?
+    """;
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, gamePlayerId);
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+                throw new RuntimeException("GamePlayer no encontrado");
+            }
+
+            return rs.getInt("seat_position");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public UUID getPlayerIdBySeat(UUID gameId, int seat) {
+        String sql = """
+        SELECT player_id
+        FROM oh_hell.game_players
+        WHERE game_id = ? AND seat_position = ?
+    """;
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ps.setInt(2, seat);
+
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) throw new RuntimeException("Jugador no encontrado");
+
+            return (UUID) rs.getObject("player_id");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public UUID getPlayerIdByGamePlayerId(long gpId) {
+        String sql = """
+        SELECT player_id
+        FROM oh_hell.game_players
+        WHERE id = ?
+    """;
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, gpId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return (UUID) rs.getObject("player_id");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public record PlayerInfo(UUID playerId, String nickname) {}
+
+    public PlayerInfo getPlayerInfo(long gamePlayerId) {
+
+        String sql = """
+        SELECT p.id, p.nickname
+        FROM oh_hell.game_players gp
+        JOIN oh_hell.players p ON p.id = gp.player_id
+        WHERE gp.id = ?
+    """;
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, gamePlayerId);
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+                throw new RuntimeException("GamePlayer no encontrado");
+            }
+
+            return new PlayerInfo(
+                    rs.getObject("id", UUID.class),
+                    rs.getString("nickname")
+            );
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

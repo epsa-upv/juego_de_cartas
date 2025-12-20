@@ -106,11 +106,27 @@ public class GameDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setObject(1, gameId);
+            ps.executeUpdate();
 
-            int updated = ps.executeUpdate();
-            if (updated == 0) {
-                throw new RuntimeException("La partida no estaba en WAITING");
-            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // ✅ PASO 9 — FIN DE PARTIDA
+    public void markFinished(UUID gameId) {
+
+        String sql = """
+            UPDATE oh_hell.games
+            SET status = 'FINISHED'
+            WHERE id = ?
+        """;
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ps.executeUpdate();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
