@@ -225,9 +225,6 @@ public class GamePlayerDAO {
         }
     }
 
-    // =========================
-    // SEATS
-    // =========================
     private int nextSeat(UUID gameId) {
 
         String sql = """
@@ -385,5 +382,37 @@ public class GamePlayerDAO {
         }
     }
 
+    // =========================
+// GET GAME PLAYERS
+// =========================
+    public List<PlayerInfo> getGamePlayers(UUID gameId) {
+        String sql = """
+        SELECT p.id, p.nickname
+        FROM oh_hell.game_players gp
+        JOIN oh_hell.players p ON p.id = gp.player_id
+        WHERE gp.game_id = ?
+        ORDER BY gp.seat_position
+    """;
 
+        List<PlayerInfo> list = new ArrayList<>();
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(new PlayerInfo(
+                        (UUID) rs.getObject("id"),
+                        rs.getString("nickname")
+                ));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return list;
+    }
 }

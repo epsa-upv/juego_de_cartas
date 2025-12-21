@@ -177,4 +177,55 @@ public class RoundDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public void startPlayingPhase(long roundId) {
+
+        String sqlPlayers = """
+        SELECT id
+        FROM oh_hell.game_players
+        WHERE game_id = (
+            SELECT game_id FROM oh_hell.rounds WHERE id = ?
+        )
+        ORDER BY seat
+    """;
+
+        String sqlCards = """
+        SELECT cards_per_player
+        FROM oh_hell.rounds
+        WHERE id = ?
+    """;
+
+        try (Connection c = Database.getConnection()) {
+
+            // 1️⃣ Obtener jugadores ordenados por asiento
+            List<Long> gamePlayerIds = new ArrayList<>();
+
+            try (PreparedStatement ps = c.prepareStatement(sqlPlayers)) {
+                ps.setLong(1, roundId);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    gamePlayerIds.add(rs.getLong("id"));
+                }
+            }
+
+            // 2️⃣ Nº de cartas por jugador
+            int cardsPerPlayer;
+            try (PreparedStatement ps = c.prepareStatement(sqlCards)) {
+                ps.setLong(1, roundId);
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                cardsPerPlayer = rs.getInt("cards_per_player");
+            }
+
+            // 3️⃣ Repartir cartas y triunfo
+            dealCards(roundId, gamePlayerIds, cardsPerPlayer);
+
+            // 4️⃣ Cambiar fase a PLAYING
+            updatePhase(roundId, "PLAYING");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

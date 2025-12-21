@@ -5,7 +5,7 @@ import com.ohhell.api.models.Game;
 
 import java.sql.*;
 import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.*;
 
 public class GameDAO {
 
@@ -139,4 +139,45 @@ public class GameDAO {
                 .substring(0, 6)
                 .toUpperCase();
     }
+
+    // =========================
+    // FIND
+    // =========================
+
+    public List<Map<String, Object>> findAvailableGames(String status) {
+        String sql = """
+        SELECT id, code, title, status, starting_cards, created_at
+        FROM oh_hell.games
+        WHERE status = ?
+        ORDER BY created_at DESC
+        LIMIT 10
+    """;
+
+        List<Map<String, Object>> games = new ArrayList<>();
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Map<String, Object> gameMap = new HashMap<>();
+                gameMap.put("id", rs.getObject("id"));
+                gameMap.put("code", rs.getString("code"));
+                gameMap.put("title", rs.getString("title"));
+                gameMap.put("status", rs.getString("status"));
+                gameMap.put("startingCards", rs.getInt("starting_cards"));
+                gameMap.put("createdAt", rs.getObject("created_at"));
+
+                games.add(gameMap);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return games;
+    }
+
 }

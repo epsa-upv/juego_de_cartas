@@ -35,11 +35,16 @@ public class PlayerDAO {
     }
 
     public Player create(UUID userId, String nickname) {
+        // Limitar nickname a 40 caracteres (límite de la BD)
+        if (nickname.length() > 40) {
+            nickname = nickname.substring(0, 40);
+        }
+
         String sql = """
-            INSERT INTO oh_hell.players (user_id, nickname)
-            VALUES (?, ?)
-            RETURNING id, created_at
-        """;
+        INSERT INTO oh_hell.players (user_id, nickname)
+        VALUES (?, ?)
+        RETURNING id, created_at
+    """;
 
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -48,7 +53,10 @@ public class PlayerDAO {
             ps.setString(2, nickname);
 
             ResultSet rs = ps.executeQuery();
-            rs.next();
+
+            if (!rs.next()) {
+                throw new RuntimeException("No se pudo crear el Player");
+            }
 
             Player p = new Player();
             p.setId((UUID) rs.getObject("id"));
@@ -59,7 +67,15 @@ public class PlayerDAO {
             return p;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            // Mejorar mensajes de error
+            String errorMsg = e.getMessage();
+            if (errorMsg.contains("players_nickname_key")) {
+                throw new RuntimeException("El nickname '" + nickname + "' ya está en uso");
+            } else if (errorMsg.contains("players_user_id_key")) {
+                throw new RuntimeException("Ya existe un Player para este usuario");
+            } else {
+                throw new RuntimeException("Error de base de datos: " + errorMsg);
+            }
         }
     }
 

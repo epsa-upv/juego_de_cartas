@@ -4,6 +4,7 @@ import com.ohhell.api.db.Database;
 
 import java.sql.*;
 import java.util.*;
+import java.util.UUID;
 
 public class RoundScoreDAO {
 
@@ -43,11 +44,30 @@ public class RoundScoreDAO {
     // =========================
     // READ SCORES (PASO 10)
     // =========================
-    public record ScoreRow(
-            long gamePlayerId,
-            int totalScore,
-            int totalTricks
-    ) {}
+    public static class ScoreRow {
+
+        private final long gamePlayerId;
+        private final int totalScore;
+        private final int totalTricks;
+
+        public ScoreRow(long gamePlayerId, int totalScore, int totalTricks) {
+            this.gamePlayerId = gamePlayerId;
+            this.totalScore = totalScore;
+            this.totalTricks = totalTricks;
+        }
+
+        public long getGamePlayerId() {
+            return gamePlayerId;
+        }
+
+        public int getTotalScore() {
+            return totalScore;
+        }
+
+        public int getTotalTricks() {
+            return totalTricks;
+        }
+    }
 
     public List<ScoreRow> getScoresForGame(UUID gameId) {
 
@@ -84,5 +104,59 @@ public class RoundScoreDAO {
         }
 
         return list;
+    }
+
+    // =========================
+    // GET PLAYER TOTAL SCORE
+    // =========================
+    public int getPlayerTotalScore(UUID gameId, UUID playerId) {
+        String sql = """
+            SELECT COALESCE(SUM(rs.points_earned), 0)
+            FROM oh_hell.round_scores rs
+            JOIN oh_hell.rounds r ON r.id = rs.round_id
+            JOIN oh_hell.game_players gp ON gp.id = rs.game_player_id
+            WHERE r.game_id = ?
+            AND gp.player_id = ?
+        """;
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ps.setObject(2, playerId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // =========================
+    // GET PLAYER TOTAL TRICKS
+    // =========================
+    public int getPlayerTotalTricks(UUID gameId, UUID playerId) {
+        String sql = """
+            SELECT COALESCE(SUM(rs.lives_change), 0)
+            FROM oh_hell.round_scores rs
+            JOIN oh_hell.rounds r ON r.id = rs.round_id
+            JOIN oh_hell.game_players gp ON gp.id = rs.game_player_id
+            WHERE r.game_id = ?
+            AND gp.player_id = ?
+        """;
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setObject(1, gameId);
+            ps.setObject(2, playerId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -29,14 +29,14 @@ public class PlayerResource {
 
         if (playerDAO.findByUserId(userId).isPresent()) {
             return Response.status(Response.Status.CONFLICT)
-                    .entity("El usuario ya tiene un player")
+                    .entity("PLAYER_ALREADY_EXISTS")
                     .build();
         }
 
         String nickname = body.get("nickname");
         if (nickname == null || nickname.isBlank()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Nickname requerido")
+                    .entity("NICKNAME_REQUIRED")
                     .build();
         }
 
@@ -54,7 +54,7 @@ public class PlayerResource {
                 .map(player -> Response.ok(player).build())
                 .orElseGet(() ->
                         Response.status(Response.Status.NOT_FOUND)
-                                .entity("Player no encontrado")
+                                .entity("PLAYER_NOT_FOUND")
                                 .build()
                 );
     }

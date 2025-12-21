@@ -21,6 +21,7 @@ public class GameResource {
     private final RoundPlayDAO roundPlayDAO = new RoundPlayDAO();
     private final RoundHandDAO roundHandDAO = new RoundHandDAO();
     private final PlayerCardDAO playerCardDAO = new PlayerCardDAO();
+    private final RoundScoreDAO roundScoreDAO = new RoundScoreDAO();  // ← ESTA LÍNEA
 
     // =========================
     // CREATE GAME
@@ -206,6 +207,93 @@ public class GameResource {
     }
 
 
+    // =========================
+    // PLACE BET
+    // =========================
+    @POST
+    @Path("/{code}/rounds/current/bets")
+
+    public Response placeBet(
+            @PathParam("code") String code,
+            Map<String, Integer> body,
+            @Context SecurityContext ctx
+    ) {
+        UUID userId = getUserId(ctx);
+
+        Game game = gameDAO.findByCode(code);
+        if (game == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Partida no encontrada")
+                    .build();
+        }
+
+        RoundView round = roundDAO.findCurrentRound(game.getId());
+        if (round == null || !"BETTING".equals(round.getPhase())) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No se puede apostar ahora")
+                    .build();
+        }
+
+        Player player = playerDAO.findByUserId(userId)
+                .orElseThrow(() -> new WebApplicationException(400));
+
+        long gpId = gamePlayerDAO.getGamePlayerId(game.getId(), player.getId());
+
+        // No permitir apostar dos veces
+        if (betDAO.hasBet(round.getId(), gpId)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Ya has apostado")
+                    .build();
+        }
+
+        Integer value = body.get("value");
+        if (value == null) {
+            return Response.status(400)
+                    .entity("Apuesta inválida")
+                    .build();
+        }
+
+        int cardsPerPlayer = round.getCardsPerPlayer();
+        int totalPlayers = gamePlayerDAO.countPlayers(game.getId());
+        int betsSoFar = betDAO.countBets(round.getId());
+        int sumSoFar = betDAO.sumBets(round.getId());
+
+    // Validación básica
+        if (value < 0 || value > cardsPerPlayer) {
+            return Response.status(400)
+                    .entity("Apuesta fuera de rango")
+                    .build();
+        }
+
+    // Regla Oh Hell
+        boolean isLastBetter = (betsSoFar == totalPlayers - 1);
+        if (isLastBetter && (sumSoFar + value == cardsPerPlayer)) {
+            return Response.status(400)
+                    .entity("Apuesta inválida: no puede cerrar la suma")
+                    .build();
+        }
+
+        // Orden de apuesta
+        int order = betDAO.nextBetOrder(round.getId());
+
+        // Insertar apuesta (AQUÍ estaba el error)
+        betDAO.placeBet(round.getId(), gpId, value, order);
+
+        // ¿Han apostado todos?
+        int totalBets = betDAO.countBets(round.getId());
+
+        if (totalBets == totalPlayers) {
+            // 👉 Empieza la fase de juego
+            roundDAO.startPlayingPhase(round.getId());
+        }
+
+        return Response.ok(Map.of(
+                "message", "BET_PLACED",
+                "value", value
+        )).build();
+    }
+
+
 
     // =========================
     // PLAY CARD
@@ -363,5 +451,56 @@ public class GameResource {
         ).build();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listAvailableGames(
+            @QueryParam("status") String status,
+            @Context SecurityContext securityContext
+    ) {
+        getUserId(securityContext);
 
+        String gameStatus = status != null ? status : "WAITING";
+
+        List<Map<String, Object>> games = gameDAO.findAvailableGames(gameStatus);
+
+        return Response.ok(games).build();
+    }
+
+    @GET
+    @Path("/{code}/results")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getGameResults(
+            @PathParam("code") String code,
+            @Context SecurityContext securityContext
+    ) {
+        getUserId(securityContext);
+
+        Game game = gameDAO.findByCode(code);
+        if (game == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        List<GamePlayerDAO.PlayerInfo> gameInfos = gamePlayerDAO.getGamePlayers(game.getId());
+
+        List<Map<String, Object>> players = gameInfos.stream()
+                .map(info -> {
+
+                    int totalPoints = roundScoreDAO.getPlayerTotalScore(game.getId(), info.playerId());
+                    int totalTricks = roundScoreDAO.getPlayerTotalTricks(game.getId(), info.playerId());
+
+                    Map<String, Object> playerMap = new HashMap<>();
+                    playerMap.put("playerId", info.playerId());
+                    playerMap.put("nickname", info.nickname());
+                    playerMap.put("points", totalPoints);
+                    playerMap.put("tricks", totalTricks);
+
+                    return playerMap;
+                })
+                .toList();
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("players", players);
+
+        return Response.ok(result).build();
+    }
 }
