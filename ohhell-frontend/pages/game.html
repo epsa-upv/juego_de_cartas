@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partida - Oh Hell!</title>
+    <!-- Solo los estilos CSS aquí -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Agregar esto en la sección de estilos */
+        .hand-card img,
+        .card-played img,
+        .trump-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 0.5rem;
+        }
+
+        /* Asegurar que las imágenes se carguen correctamente */
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Estilos para cartas jugables */
+        .hand-card.playable {
+            border-color: var(--secondary);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .hand-card.playable:hover {
+            transform: translateY(-25px) scale(1.12);
+            box-shadow: 0 30px 60px rgba(16, 185, 129, 0.4);
+            z-index: 10;
+        }
+
+        .hand-card.not-playable {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: var(--danger);
+        }
+
+        .hand-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: var(--text-muted);
+        }
+        .page-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============ NAVBAR ============ */
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .navbar-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .navbar-info {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex: 1;
+        }
+
+        .navbar-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .navbar-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .navbar-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .btn-leave {
+            padding: 0.5rem 1.5rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-leave:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        /* ============ MAIN LAYOUT ============ */
+        .game-wrapper {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        /* ============ SIDEBAR IZQUIERDO ============ */
+        .sidebar-left {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* ============ MESA CENTRAL ============ */
+        .game-center {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .game-status {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.125rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* MESA */
+        .game-table {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+            border-radius: 2rem;
+            padding: 3rem;
+            aspect-ratio: 4 / 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 2px 30px rgba(0, 0, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Posiciones de jugadores */
+        .players-positions {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-seat {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.75rem;
+        }
+
+        /* Top - Jugador 1 */
+        .player-seat:nth-child(1) {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Right - Jugador 2 */
+        .player-seat:nth-child(2) {
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Bottom - Jugador 3 */
+        .player-seat:nth-child(3) {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Left - Jugador 4 */
+        .player-seat:nth-child(4) {
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            text-align: center;
+            transition: all var(--transition);
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .player-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .player-card.active {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .player-card.current-turn {
+            background: rgba(16, 185, 129, 0.4);
+            border-color: var(--secondary);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
+            animation: turnPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes turnPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 40px rgba(16, 185, 129, 1);
+            }
+        }
+
+        .turn-indicator {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: var(--secondary);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .player-status {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .player-card-slot {
+            width: 50px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        /* CENTRO - MAZO Y TRIUNFO */
+        .table-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .deck-area {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .deck-card {
+            width: 80px;
+            height: 110px;
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            border-radius: 0.75rem;
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .deck-card::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+        }
+
+        .trump-label {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--warning);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .trump-card {
+            width: 80px;
+            height: 110px;
+            background: white;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--warning);
+        }
+
+        .cards-played {
+            position: relative;
+            width: 200px;
+            height: 150px;
+            margin-top: 1rem;
+        }
+
+        .card-played {
+            width: 70px;
+            height: 100px;
+            background: white;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: cardFlip 500ms ease-out;
+            position: absolute;
+            border: 2px solid #333;
+        }
+
+        @keyframes cardFlip {
+            from { transform: rotateY(90deg) rotateZ(0deg); opacity: 0; }
+            to { transform: rotateY(0) rotateZ(0deg); opacity: 1; }
+        }
+
+        /* Apilamiento en cascada */
+        .card-played:nth-child(1) {
+            transform: translateX(0px) translateY(0px) rotateZ(-15deg);
+            z-index: 1;
+        }
+
+        .card-played:nth-child(2) {
+            transform: translateX(25px) translateY(15px) rotateZ(-5deg);
+            z-index: 2;
+        }
+
+        .card-played:nth-child(3) {
+            transform: translateX(50px) translateY(30px) rotateZ(5deg);
+            z-index: 3;
+        }
+
+        .card-played:nth-child(4) {
+            transform: translateX(75px) translateY(45px) rotateZ(15deg);
+            z-index: 4;
+        }
+
+        /* ============ SIDEBAR DERECHO ============ */
+        .sidebar-right {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .scores-card {
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .scores-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .scores-table {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .scores-header {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .scores-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .score-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 0.75rem;
+            padding: 0.85rem;
+            background: var(--bg-tertiary);
+            border-radius: 0.5rem;
+            align-items: center;
+            transition: all var(--transition);
+            border-left: 4px solid transparent;
+            border-top: 2px solid transparent;
+        }
+
+        .score-row:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-left-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .score-row.current {
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.25), rgba(99, 102, 241, 0.1));
+            border-left-color: var(--primary);
+            border-top-color: var(--primary);
+        }
+
+        .score-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .score-bet {
+            text-align: center;
+            color: var(--warning);
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: rgba(245, 158, 11, 0.1);
+            padding: 0.35rem;
+            border-radius: 0.35rem;
+        }
+
+        .score-points {
+            text-align: center;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.35rem;
+            border-radius: 0.35rem;
+        }
+
+        /* ============ MANO DEL JUGADOR ============ */
+        .hand-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, var(--bg-secondary) 100%);
+            border-top: 3px solid var(--primary);
+            padding: 1.5rem 2rem;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+
+        .hand-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hand-cards {
+            display: flex;
+            gap: 1.25rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .hand-card {
+            width: 90px;
+            height: 130px;
+            background: white;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid var(--primary);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .hand-card::before {
+            content: 'JUGAR';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(99, 102, 241, 0.95);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.4rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            opacity: 0;
+            transition: opacity 300ms;
+            pointer-events: none;
+        }
+
+        .hand-card:hover:not(.disabled) {
+            transform: translateY(-25px) scale(1.12);
+            box-shadow: 0 30px 60px rgba(99, 102, 241, 0.4);
+            z-index: 10;
+        }
+
+        .hand-card:hover:not(.disabled)::before {
+            opacity: 1;
+        }
+
+        .hand-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: var(--text-muted);
+        }
+
+        .hand-card.playable {
+            border-color: var(--secondary);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .hand-card.not-playable {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: var(--danger);
+        }
+
+        /* ============ PANEL DE ESTADO DE APUESTAS ============ */
+        .betting-status-panel {
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 2px solid var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .betting-status-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .betting-status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .betting-status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 0.5rem;
+            border-left: 3px solid transparent;
+        }
+
+        .betting-status-item.pending {
+            border-left-color: var(--warning);
+        }
+
+        .betting-status-item.done {
+            border-left-color: var(--secondary);
+        }
+
+        .betting-status-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .betting-status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .betting-status-badge.pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .betting-status-badge.done {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--secondary);
+        }
+
+        .betting-status-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        /* ============ ÚLTIMA BAZA GANADA ============ */
+        .last-trick-panel {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 2px solid var(--secondary);
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .last-trick-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .last-trick-winner {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            animation: fadeInScale 600ms ease-out;
+        }
+
+        .last-trick-badge {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.5rem;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ============ MODAL APUESTA ============ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-subtitle {
+            color: var(--text-muted);
+        }
+
+        .modal-body {
+            margin-bottom: 2rem;
+        }
+
+        .bet-input-wrapper {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bet-input {
+            flex: 1;
+            padding: 1rem;
+            font-size: 2rem;
+            text-align: center;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--primary);
+            border-radius: 0.75rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .bet-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .quick-bets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-bet-btn {
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-secondary);
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .quick-bet-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--text-muted);
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 1400px) {
+            .game-wrapper {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .sidebar-left, .sidebar-right {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .info-card, .scores-card {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-wrapper {
+                padding: 1rem;
+            }
+
+            .game-table {
+                padding: 2rem;
+                aspect-ratio: auto;
+                height: 400px;
+            }
+
+            .player-seat {
+                width: 90px;
+                height: 90px;
+            }
+
+            .hand-section {
+                padding: 1rem;
+            }
+
+            .hand-cards {
+                gap: 0.75rem;
+            }
+
+            .hand-card {
+                width: 70px;
+                height: 100px;
+                font-size: 2rem;
+            }
+
+            .navbar-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <span class="navbar-brand">🎴 OH HELL!</span>
+                <div class="navbar-user">
+                    <div class="navbar-user-avatar" id="user-avatar">T</div>
+                    <span id="user-name">Tú</span>
+                </div>
+            </div>
+            <div class="navbar-info">
+                <div class="navbar-item">
+                    <span class="navbar-label">Ronda</span>
+                    <span class="navbar-value" id="round-info">1</span>
+                </div>
+                <div class="navbar-item">
+                    <span class="navbar-label">Estado</span>
+                    <span class="navbar-value" id="phase-info">Apuestas</span>
+                </div>
+            </div>
+            <button class="btn-leave" id="leave-btn">Salir</button>
+        </div>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="game-wrapper">
+
+        <!-- SIDEBAR IZQUIERDO -->
+        <div class="sidebar-left">
+            <div class="info-card">
+                <div class="info-label">Tu Apuesta</div>
+                <div class="info-value" id="my-bet">-</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Cartas en Mano</div>
+                <div class="info-value" id="hand-count">0</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Jugadores</div>
+                <div class="info-value" id="player-count">2</div>
+            </div>
+
+            <!-- PANEL DE ESTADO DE APUESTAS -->
+            <div id="betting-status-container" class="betting-status-panel" style="display: none;">
+                <div class="betting-status-title">📊 Estado de Apuestas</div>
+                <div class="betting-status-list" id="betting-status-list">
+                    <!-- Se rellena dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTRO - MESA DE JUEGO -->
+        <div class="game-center">
+            <div class="game-status" id="game-status">⏳ Esperando apuestas...</div>
+
+            <div class="game-table">
+                <!-- POSICIONES DE JUGADORES -->
+                <div class="players-positions" id="players-positions">
+                    <!-- Se rellena dinámicamente -->
+                </div>
+
+                <!-- CENTRO DE LA MESA -->
+                <div class="table-center">
+                    <div class="deck-area">
+                        <div class="deck-card">
+                            📦
+                            <div class="trump-label">MAZO</div>
+                        </div>
+                        <div class="trump-card" id="trump-suit">♠</div>
+                    </div>
+                    <div class="cards-played" id="cards-played">
+                        <!-- Cartas jugadas se muestran aquí -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR DERECHO -->
+        <div class="sidebar-right">
+            <!-- ÚLTIMA BAZA -->
+            <div id="last-trick-container" class="last-trick-panel" style="display: none;">
+                <div class="last-trick-title">🏆 Última Baza</div>
+                <div class="last-trick-winner" id="last-trick-winner">-</div>
+                <div class="last-trick-badge" id="last-trick-badge">Ganador</div>
+            </div>
+
+            <div class="scores-card">
+                <h3>📊 Puntuación</h3>
+                <div class="scores-table">
+                    <div class="scores-header">
+                        <div>Jugador</div>
+                        <div>Apuesta</div>
+                        <div>Pts</div>
+                    </div>
+                    <div class="scores-body" id="scores-list">
+                        <!-- Se rellena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MANO DEL JUGADOR -->
+    <div class="hand-section">
+        <div class="hand-label">🤚 Tu mano</div>
+        <div class="hand-cards" id="hand-cards">
+            <!-- Se rellena dinámicamente -->
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL APUESTA -->
+<div id="bet-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">🎯 ¿Cuántas bazas ganarás?</h2>
+            <p class="modal-subtitle">Selecciona tu apuesta o ingresa un número</p>
+        </div>
+
+        <div class="modal-body">
+            <div class="bet-input-wrapper">
+                <input
+                        type="number"
+                        id="bet-input"
+                        class="bet-input"
+                        min="0"
+                        step="1"
+                        placeholder="0"
+                />
+            </div>
+
+            <div class="quick-bets" id="quick-bets">
+                <!-- Se rellena dinámicamente -->
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn-primary" id="confirm-bet-btn">✅ Confirmar</button>
+            <button class="btn-secondary" id="cancel-bet-btn">❌ Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cargar JavaScript externo -->
+<script src="../js/pages/game.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Menú principal de Oh Hell! Game">
+    <title>Home - Oh Hell!</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <span class="navbar-brand">
+                <span class="navbar-logo">🎴</span>
+                OH HELL!
+            </span>
+
+            <div class="navbar-menu">
+                <div class="navbar-user">
+                    <div class="navbar-avatar" id="user-avatar">?</div>
+                    <span id="user-name">Cargando...</span>
+                </div>
+                <button class="btn btn-danger btn-sm" id="logout-btn">
+                    Salir
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="content-wrapper">
+        <div class="home-container">
+
+            <div class="home-logo">
+                <div class="home-logo-icon">🎴</div>
+            </div>
+
+            <h1 class="home-title">OH HELL!</h1>
+            <p class="home-subtitle">El juego de cartas más emocionante</p>
+
+            <div class="home-actions">
+                <button
+                        class="btn btn-primary btn-lg btn-full"
+                        id="create-game-btn">
+                    🎮 Crear Partida Nueva
+                </button>
+
+                <a
+                        href="join-game.html"
+                        class="btn btn-secondary btn-lg btn-full">
+                    🔓 Unirse a Partida Existente
+                </a>
+            </div>
+
+            <!-- Info -->
+            <div class="home-info">
+                <div class="info-card">
+                    <div class="info-icon">👥</div>
+                    <div class="info-text">
+                        <div class="info-label">Jugadores</div>
+                        <div class="info-value">2-4</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">⏱️</div>
+                    <div class="info-text">
+                        <div class="info-label">Duración</div>
+                        <div class="info-value">15-30 min</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">🎯</div>
+                    <div class="info-text">
+                        <div class="info-label">Dificultad</div>
+                        <div class="info-value">Media</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">
+                Oh Hell! Game © 2025 - Caos controlado Team
+            </p>
+        </div>
+    </footer>
+
+</div>
+
+<!-- Scripts reales -->
+<script src="../js/api/http.js"></script>
+<script src="../js/pages/home.js"></script>
+
+</body>
+</html>
