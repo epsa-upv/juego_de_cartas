@@ -21,7 +21,7 @@ public class GameResource {
     private final RoundPlayDAO roundPlayDAO = new RoundPlayDAO();
     private final RoundHandDAO roundHandDAO = new RoundHandDAO();
     private final PlayerCardDAO playerCardDAO = new PlayerCardDAO();
-    private final RoundScoreDAO roundScoreDAO = new RoundScoreDAO();  // ← ESTA LÍNEA
+    private final RoundScoreDAO roundScoreDAO = new RoundScoreDAO();
 
     // =========================
     // CREATE GAME
@@ -118,6 +118,7 @@ public class GameResource {
                 )
         ).build();
     }
+
     // =========================
     // READY
     // =========================
@@ -138,7 +139,7 @@ public class GameResource {
     }
 
     // =========================
-    // START GAME
+    // START GAME - CORREGIDO
     // =========================
     @POST
     @Path("/{code}/start")
@@ -149,27 +150,53 @@ public class GameResource {
         UUID userId = getUserId(ctx);
 
         Game game = gameDAO.findByCode(code);
-        if (game == null) return Response.status(404).build();
+        if (game == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Partida no encontrada")
+                    .build();
+        }
 
         Player player = playerDAO.findByUserId(userId)
                 .orElseThrow(() -> new WebApplicationException(400));
 
         if (!gamePlayerDAO.isHost(game.getId(), player.getId())) {
-            return Response.status(403).build();
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("Solo el host puede iniciar la partida")
+                    .build();
         }
 
         if (!gamePlayerDAO.areAllPlayersReady(game.getId())) {
-            return Response.status(400).entity("No todos están READY").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No todos están READY")
+                    .build();
         }
 
+        // Marcar juego como iniciado
         gameDAO.markStarted(game.getId());
+
+        // Crear primera ronda y repartir cartas inmediatamente
         roundDAO.createFirstRound(game.getId(), game.getStartingCards(), 0);
 
-        return Response.ok(Map.of("message", "GAME_STARTED")).build();
+        // Obtener la ronda recién creada
+        RoundView round = roundDAO.findCurrentRound(game.getId());
+        if (round == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al crear la ronda")
+                    .build();
+        }
+
+        // Obtener jugadores y repartir cartas inmediatamente
+        List<Long> gamePlayerIds = gamePlayerDAO.getGamePlayerIds(game.getId());
+        roundDAO.dealCards(round.getId(), gamePlayerIds, game.getStartingCards());
+
+        return Response.ok(Map.of(
+                "message", "GAME_STARTED",
+                "roundId", round.getId()
+        )).build();
     }
 
     // =========================
-    // BET
+    // GET CURRENT ROUND BETS
     // =========================
     @GET
     @Path("/{code}/rounds/current/bets")
@@ -181,12 +208,16 @@ public class GameResource {
 
         Game game = gameDAO.findByCode(code);
         if (game == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Partida no encontrada")
+                    .build();
         }
 
         RoundView round = roundDAO.findCurrentRound(game.getId());
         if (round == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("No hay ronda activa")
+                    .build();
         }
 
         List<BetDAO.BetRow> rows = betDAO.getBetsForRound(round.getId());
@@ -206,13 +237,11 @@ public class GameResource {
         return Response.ok(new RoundBetsView(round.getId(), bets)).build();
     }
 
-
     // =========================
     // PLACE BET
     // =========================
     @POST
     @Path("/{code}/rounds/current/bets")
-
     public Response placeBet(
             @PathParam("code") String code,
             Map<String, Integer> body,
@@ -248,7 +277,7 @@ public class GameResource {
 
         Integer value = body.get("value");
         if (value == null) {
-            return Response.status(400)
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Apuesta inválida")
                     .build();
         }
@@ -258,17 +287,17 @@ public class GameResource {
         int betsSoFar = betDAO.countBets(round.getId());
         int sumSoFar = betDAO.sumBets(round.getId());
 
-    // Validación básica
+        // Validación básica
         if (value < 0 || value > cardsPerPlayer) {
-            return Response.status(400)
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Apuesta fuera de rango")
                     .build();
         }
 
-    // Regla Oh Hell
+        // Regla Oh Hell
         boolean isLastBetter = (betsSoFar == totalPlayers - 1);
         if (isLastBetter && (sumSoFar + value == cardsPerPlayer)) {
-            return Response.status(400)
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Apuesta inválida: no puede cerrar la suma")
                     .build();
         }
@@ -282,20 +311,9 @@ public class GameResource {
         // ¿Han apostado todos?
         int totalBets = betDAO.countBets(round.getId());
 
-        // 🐛 DEBUG: Log para identificar el problema
-        System.out.println("=== DEBUG APUESTAS ===");
-        System.out.println("Total jugadores: " + totalPlayers);
-        System.out.println("Total apuestas: " + totalBets);
-        System.out.println("¿Todos apostaron? " + (totalBets == totalPlayers));
-        System.out.println("====================");
-
         if (totalBets == totalPlayers) {
-            System.out.println("✅ Todos apostaron - Iniciando fase PLAYING...");
-            // 👉 Empieza la fase de juego
+            // Empieza la fase de juego
             roundDAO.startPlayingPhase(round.getId());
-            System.out.println("✅ Fase PLAYING iniciada");
-        } else {
-            System.out.println("⏳ Esperando más apuestas: " + totalBets + "/" + totalPlayers);
         }
 
         return Response.ok(Map.of(
@@ -303,8 +321,6 @@ public class GameResource {
                 "value", value
         )).build();
     }
-
-
 
     // =========================
     // PLAY CARD
@@ -322,7 +338,9 @@ public class GameResource {
         RoundView round = roundDAO.findCurrentRound(game.getId());
 
         if (round == null || !"PLAYING".equals(round.getPhase())) {
-            return Response.status(400).entity("No se puede jugar ahora").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No se puede jugar ahora")
+                    .build();
         }
 
         Player player = playerDAO.findByUserId(userId)
@@ -338,18 +356,22 @@ public class GameResource {
         int seat = gamePlayerDAO.getSeat(game.getId(), player.getId());
 
         if (seat != expectedSeat) {
-            return Response.status(400).entity("No es tu turno").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No es tu turno")
+                    .build();
         }
 
         String card = req.getCard();
         String suit = card.split("_")[1];
 
         String leadSuit = roundHandDAO.getLeadSuit(round.getId());
-        // El leadSuit se calcula automáticamente desde round_plays, no necesita set
-
-        if (leadSuit != null && !suit.equals(leadSuit)
+        if (leadSuit == null) {
+            roundHandDAO.setLeadSuit(round.getId(), suit);
+        } else if (!suit.equals(leadSuit)
                 && playerCardDAO.playerHasSuit(round.getId(), gpId, leadSuit)) {
-            return Response.status(400).entity("Debes seguir el palo").build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Debes seguir el palo")
+                    .build();
         }
 
         playerCardDAO.removeCard(round.getId(), gpId, card);
@@ -373,17 +395,16 @@ public class GameResource {
         RoundView round = roundDAO.findCurrentRound(game.getId());
 
         if (round == null || !"PLAYING".equals(round.getPhase())) {
-            return Response.status(400).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("La ronda no está en juego")
+                    .build();
         }
 
         int total = gamePlayerDAO.countPlayers(game.getId());
         int plays = roundPlayDAO.countPlays(round.getId());
 
-        // El turno actual en la baza se calcula con módulo
-        int playsInCurrentTrick = plays % total;
-
         int firstSeat = (round.getDealerSeat() + 1) % total;
-        int seat = (firstSeat + playsInCurrentTrick) % total;
+        int seat = (firstSeat + plays) % total;
 
         UUID currentPlayer =
                 gamePlayerDAO.getPlayerIdBySeat(game.getId(), seat);
@@ -408,7 +429,9 @@ public class GameResource {
         return ((UserPrincipal) ctx.getUserPrincipal()).getUserId();
     }
 
-
+    // =========================
+    // GET CURRENT ROUND
+    // =========================
     @GET
     @Path("/{code}/rounds/current")
     public Response getCurrentRound(
@@ -419,18 +442,23 @@ public class GameResource {
 
         Game game = gameDAO.findByCode(code);
         if (game == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Partida no encontrada")
+                    .build();
         }
 
         RoundView round = roundDAO.findCurrentRound(game.getId());
         if (round == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("No hay ronda activa")
+                    .build();
         }
 
         return Response.ok(round).build();
     }
+
     // =========================
-    // HAND (PASO 13)
+    // HAND - CORREGIDO: Permitir BETTING y PLAYING
     // =========================
     @GET
     @Path("/{code}/hand")
@@ -442,13 +470,18 @@ public class GameResource {
 
         Game game = gameDAO.findByCode(code);
         if (game == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Partida no encontrada")
+                    .build();
         }
 
         RoundView round = roundDAO.findCurrentRound(game.getId());
-        if (round == null || !"PLAYING".equals(round.getPhase())) {
+
+        // Permitir obtener mano en fase BETTING y PLAYING
+        Set<String> validPhases = Set.of("BETTING", "PLAYING");
+        if (round == null || !validPhases.contains(round.getPhase())) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("La ronda no está en juego")
+                    .entity("La ronda no está en juego o apuestas")
                     .build();
         }
 
@@ -457,14 +490,20 @@ public class GameResource {
 
         long gpId = gamePlayerDAO.getGamePlayerId(game.getId(), player.getId());
 
+        List<String> cards = playerCardDAO.getHand(round.getId(), gpId);
+
         return Response.ok(
                 Map.of(
                         "roundId", round.getId(),
-                        "cards", playerCardDAO.getHand(round.getId(), gpId)
+                        "cards", cards,
+                        "count", cards.size()
                 )
         ).build();
     }
 
+    // =========================
+    // LIST AVAILABLE GAMES
+    // =========================
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response listAvailableGames(
@@ -480,6 +519,9 @@ public class GameResource {
         return Response.ok(games).build();
     }
 
+    // =========================
+    // GET GAME RESULTS
+    // =========================
     @GET
     @Path("/{code}/results")
     @Produces(MediaType.APPLICATION_JSON)
@@ -498,7 +540,6 @@ public class GameResource {
 
         List<Map<String, Object>> players = gameInfos.stream()
                 .map(info -> {
-
                     int totalPoints = roundScoreDAO.getPlayerTotalScore(game.getId(), info.playerId());
                     int totalTricks = roundScoreDAO.getPlayerTotalTricks(game.getId(), info.playerId());
 
