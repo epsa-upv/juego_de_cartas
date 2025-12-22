@@ -7,41 +7,23 @@ import java.sql.*;
 public class RoundHandDAO {
 
     public String getLeadSuit(long roundId) {
+        // El lead suit es el palo de la primera carta jugada en la baza actual
         try (Connection c = Database.getConnection();
              PreparedStatement ps = c.prepareStatement(
-                     "SELECT lead_suit FROM oh_hell.round_hands WHERE round_id = ?")) {
+                     """
+                     SELECT SUBSTRING(card FROM 3) as suit
+                     FROM oh_hell.round_plays
+                     WHERE round_id = ?
+                     ORDER BY play_order ASC
+                     LIMIT 1
+                     """)) {
             ps.setLong(1, roundId);
             ResultSet rs = ps.executeQuery();
-            return rs.next() ? rs.getString(1) : null;
+            return rs.next() ? rs.getString("suit") : null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void setLeadSuit(long roundId, String suit) {
-        try (Connection c = Database.getConnection();
-             PreparedStatement ps = c.prepareStatement("""
-                 INSERT INTO oh_hell.round_hands (round_id, lead_suit)
-                 VALUES (?,?)
-                 ON CONFLICT (round_id)
-                 DO UPDATE SET lead_suit = EXCLUDED.lead_suit
-             """)) {
-            ps.setLong(1, roundId);
-            ps.setString(2, suit);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void clearLeadSuit(long roundId) {
-        try (Connection c = Database.getConnection();
-             PreparedStatement ps = c.prepareStatement(
-                     "DELETE FROM oh_hell.round_hands WHERE round_id = ?")) {
-            ps.setLong(1, roundId);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    // setLeadSuit y clearLeadSuit eliminados - el lead suit se calcula desde round_plays
 }

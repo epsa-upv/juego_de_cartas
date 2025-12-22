@@ -415,31 +415,4 @@ public class GamePlayerDAO {
 
         return list;
     }
-
-    public List<Long> getGamePlayerIds(UUID gameId) {
-        String sql = """
-        SELECT id
-        FROM oh_hell.game_players
-        WHERE game_id = ?
-        ORDER BY seat_position
-    """;
-
-        List<Long> ids = new ArrayList<>();
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setObject(1, gameId);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                ids.add(rs.getLong("id"));
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ids;
-    }
 }

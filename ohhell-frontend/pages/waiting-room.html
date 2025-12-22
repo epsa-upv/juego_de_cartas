@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Oh Hell! - Sala de Espera">
+    <title>Sala de Espera - Oh Hell!</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="home.html" class="navbar-brand">
+                <span class="navbar-logo">🎴</span>
+                OH HELL!
+            </a>
+            <button class="btn btn-danger btn-sm" id="leave-btn">
+                ← Salir de la sala
+            </button>
+        </div>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="content-wrapper">
+        <div class="waiting-room-container">
+
+            <div class="waiting-room-header">
+                <h1 class="waiting-title">🎮 Sala de Espera</h1>
+
+                <div class="game-code-box">
+                    <div class="code-label">CÓDIGO DE LA PARTIDA</div>
+                    <div class="code-display" id="gameCode">----</div>
+                    <button class="btn btn-secondary" id="copy-code-btn">
+                        📋 Copiar Código
+                    </button>
+                </div>
+            </div>
+
+            <div class="waiting-room-grid">
+
+                <!-- Jugadores -->
+                <div class="players-section">
+                    <h2 class="section-title">👥 Jugadores</h2>
+                    <div id="players-list" class="players-container"></div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="config-section">
+                    <button id="ready-btn" class="btn btn-secondary btn-lg btn-full">
+                        ✅ Estoy listo
+                    </button>
+
+                    <button id="start-btn"
+                            class="btn btn-primary btn-lg btn-full"
+                            style="display:none;">
+                        🚀 Iniciar partida
+                    </button>
+
+                    <p id="waiting-message">
+                        ⏳ Esperando a que el host inicie la partida...
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Scripts -->
+<script src="../js/api/http.js"></script>
+<script src="../js/pages/waiting-room.js"></script>
+
+</body>
+</html>

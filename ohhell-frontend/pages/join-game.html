@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Unirse a una partida de Oh Hell!">
+    <title>Unirse a Partida - Oh Hell!</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="home.html" class="navbar-brand">
+                <span class="navbar-logo">🎴</span>
+                OH HELL!
+            </a>
+
+            <div class="navbar-menu">
+                <a href="home.html" class="btn btn-outline btn-sm">← Volver</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="content-wrapper">
+        <div class="join-game-container">
+
+            <div class="join-game-header">
+                <h1 class="join-game-title">🔓 Unirse a Partida</h1>
+                <p class="join-game-subtitle">
+                    Ingresa el código de la partida para unirte
+                </p>
+            </div>
+
+            <div class="join-game-card">
+
+                <!-- Formulario -->
+                <div class="form-section">
+                    <h2 class="section-title">📝 Código de Partida</h2>
+
+                    <div class="form-group">
+                        <label for="game-code-input" class="form-label">
+                            Ingresa el código compartido
+                        </label>
+                        <input
+                                type="text"
+                                id="game-code-input"
+                                class="form-input form-input-large"
+                                placeholder="Ej: ABCD"
+                                maxlength="10"
+                                autocomplete="off"
+                        />
+                        <small class="form-help">
+                            Pide el código a quien creó la partida
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <button
+                                class="btn btn-primary btn-lg btn-full"
+                                id="join-btn">
+                            🔓 Unirse a Partida
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Partidas disponibles -->
+                <div class="form-section" style="margin-top: var(--space-8);">
+                    <h2 class="section-title">🎮 Partidas Disponibles</h2>
+                    <p class="section-subtitle">
+                        Estas partidas están esperando jugadores:
+                    </p>
+
+                    <div class="games-list" id="games-list">
+                        <div class="game-loading">
+                            <p>Cargando partidas disponibles...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">
+                Oh Hell! Game © 2025 - Tomás Engonga Ovono Nsuga
+            </p>
+        </div>
+    </footer>
+
+</div>
+
+<!-- Scripts reales -->
+<script src="../js/api/http.js"></script>
+<script src="../js/pages/join-game.js"></script>
+
+</body>
+</html>

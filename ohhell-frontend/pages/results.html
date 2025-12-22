@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - Oh Hell!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .page-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============ NAVBAR ============ */
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        /* ============ CONTENT ============ */
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* ============ WINNER ============ */
+        .winner-section {
+            margin-bottom: 3rem;
+            animation: slideUp 600ms ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .winner-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .winner-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .winner-name {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .winner-points {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        /* ============ RANKING ============ */
+        .ranking-section {
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ranking-item {
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: all var(--transition);
+        }
+
+        .ranking-item:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .ranking-position {
+            font-size: 2rem;
+            font-weight: 900;
+            min-width: 60px;
+        }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .ranking-stats {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .ranking-points {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-align: right;
+        }
+
+        /* ============ ACTIONS ============ */
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ============ FOOTER ============ */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 2rem;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="home.html" class="navbar-brand">🎴 OH HELL!</a>
+        </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="content-wrapper">
+        <div class="container">
+
+            <!-- GANADOR -->
+            <div class="winner-section">
+                <div class="winner-icon">🏆</div>
+                <h1 class="winner-title">¡Ganador!</h1>
+                <div class="winner-name" id="winner-name">Cargando...</div>
+                <div class="winner-points" id="winner-points">Puntos: -- pts</div>
+            </div>
+
+            <!-- RANKING -->
+            <div class="ranking-section">
+                <h2 class="section-title">📊 Clasificación Final</h2>
+                <div class="ranking-list" id="ranking-list">
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        Cargando resultados...
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCIONES -->
+            <div class="actions">
+                <a href="home.html" class="btn btn-primary">
+                    🏠 Volver al Inicio
+                </a>
+                <a href="create-game.html" class="btn btn-secondary">
+                    🔄 Jugar de Nuevo
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p class="footer-text">Oh Hell! Game © 2025</p>
+    </footer>
+
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+
+    if (!code) {
+        alert('❌ Código inválido');
+        window.location.href = 'home.html';
+    }
+
+    const API_BASE = 'http://localhost:8080/ohhell-api/api';
+    const winnerNameEl = document.getElementById('winner-name');
+    const winnerPointsEl = document.getElementById('winner-points');
+    const rankingListEl = document.getElementById('ranking-list');
+
+    async function loadResults() {
+        try {
+            const res = await fetch(`${API_BASE}/games/${code}/results`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                throw new Error('No se pudieron cargar los resultados');
+            }
+
+            const data = await res.json();
+            const players = data.players || [];
+
+            if (players.length === 0) {
+                throw new Error('Sin datos de jugadores');
+            }
+
+            const sorted = [...players].sort((a, b) => b.points - a.points);
+            const winner = sorted[0];
+
+            winnerNameEl.textContent = winner.nickname;
+            winnerPointsEl.textContent = `${winner.points} pts`;
+
+            renderRanking(sorted);
+
+        } catch (error) {
+            console.error(error);
+            rankingListEl.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    Error al cargar resultados
+                </div>
+            `;
+        }
+    }
+
+    function renderRanking(players) {
+        rankingListEl.innerHTML = '';
+
+        const medals = ['🥇', '🥈', '🥉'];
+
+        players.forEach((player, idx) => {
+            const medal = medals[idx] || `#${idx + 1}`;
+
+            const div = document.createElement('div');
+            div.className = 'ranking-item';
+            div.innerHTML = `
+                <div class="ranking-position">${medal}</div>
+                <div class="ranking-info">
+                    <div class="ranking-name">${player.nickname}</div>
+                    <div class="ranking-stats">
+                        ${player.tricks || 0} bazas correctas
+                    </div>
+                </div>
+                <div class="ranking-points">${player.points} pts</div>
+            `;
+            rankingListEl.appendChild(div);
+        });
+    }
+
+    loadResults();
+</script>
+
+</body>
+</html>
